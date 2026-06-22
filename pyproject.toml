@@ -1,0 +1,12 @@
+[project]
+name = "nexelpy"
+version = "1.13.21"
+description = "comingsoon"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [ {name = "NexeLinstance", email = "nexelinstance@gmail.com"},]
+dependencies = ["starlette","uvicorn","cryptography","rich"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
