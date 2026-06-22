@@ -1,0 +1,60 @@
+<script>
+    function setstyle(element, styleName, value, delay = "0") {
+        for (const el of document.querySelectorAll(element)) {
+            if (el) { setTimeout(function () { el.style[styleName] = value; }, delay); } else { console.log("Cannot find element by :" + element );}}}
+</script>
+
+<p id="para">this is paragraph</p>
+<p id="para2">this is paragraph2</p>
+<button id="btn"
+    onclick='setstyle("#para", "color", "red");setstyle("#para", "backgroundColor", "black");setstyle("#para", "padding", "35px");setstyle("#para", "fontSize", "35px");setstyle("#btn", "fontSize", "35px");setstyle("#btn", "backgroundColor", "yellow");setstyle("#para", "padding", "35px");'>click
+    me!</button>
+<button id="btn2" onclick="setstyle('p','color','green')">btn2</button>
+
+
+appendText
+dependText
+replaceText
+isText
+getText
+getValue
+
+addStyle
+removeStyle
+isStyle
+
+addClass
+replaceClass
+removeClass
+hasClass
+
+setAttr
+hasAttr
+removeAttr
+
+addProps
+replaceProps
+removeProps
+hasProps
+
+addNextyle
+replaceNextyle
+removeNextyle
+hassNextyle
+
+appendHtml
+dependHtml
+replaceHtml
+replaceElement
+
+ajax(url,method,sendData=[],succes=[],error=[])
+
+select("#btn") 
+event("click") 
+Listener("#btn","click") 
+removeListener
+
+
+check()
+
+
