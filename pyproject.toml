@@ -1,6 +1,6 @@
 [project]
 name = "nexelpy"
-version = "1.13.21"
+version = "1.13.23" 
 description = "comingsoon"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -8,10 +8,10 @@ authors = [
     {name = "NexeLinstance", email = "nexelinstance@gmail.com"},
 ]
 dependencies = [
-    "starlette",
-    "uvicorn",
-    "cryptography",
-    "rich",
+    "starlette>=0.27",
+    "uvicorn>=0.23",
+    "cryptography>=39.0",
+    "rich>=13.0",
 ]
 
 [build-system]
@@ -19,14 +19,5 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-
 where = ["."]
-include = [
-    "nexelpy",    
-    "nexelpy.*",
-]
-exclude = [
-    "__pycache__*",
-    "*.test*",
-    "*.egg-info*",
-]
+include = ["nexelpy", "nexelpy.*"]
