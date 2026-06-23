@@ -4,7 +4,6 @@ from .registerations.moduleInspector import ModuleInspector
 from .registerations.moduleRunHasDecorator import ModuleRunHasDecorator
 from .wraper_handler import wraper_handler
 from .reloader import Reloader, detect_runtime_env, is_production_like
-from ..nexel_routes import home
 from starlette.applications import Starlette
 import uvicorn,sys
 from rich.console import Console
@@ -15,10 +14,9 @@ from.reDirect import redirect_exception_handler,RedirectException
 from starlette.staticfiles import StaticFiles
 from pathlib import Path
 import os
-
-# from ..normTemps import NormTemps, NormTempsConfig
-
 from starlette.responses import PlainTextResponse
+
+
 class MyStaticFiles(StaticFiles):
     async def __call__(self, scope, receive, send):
         if "/static/" not in scope["path"]:
@@ -32,26 +30,23 @@ class MyStaticFiles(StaticFiles):
 class MainAppBuilder:
     def __init__(self,file=__file__,devMode=True):
         
-        if _Global_nexelpy_var.root_progect is not None:
+        if _Global_nexelpy_var.root_progect is not None:   #-----check nexelpy not run in other prosses without venve
             print("nexelpy run in another project, try with venv.")
         else:
             _Global_nexelpy_var.root_progect = file
             self.root_dir = os.path.dirname(os.path.abspath(file))
             _Global_nexelpy_var.project_root_dir = self.root_dir
             _Global_nexelpy_var.dev_Mode = devMode
-
+            #---------------- make starlette app --------------------
             self.app = Starlette(exception_handlers={ RedirectException: redirect_exception_handler })
-            _Global_nexelpy_var.__MAINAPP__ = self.app
-            self.app.add_route("/nexelpy", wraper_handler(home.nexelpy_home), methods=["GET"])
-            
-            #----- mount static file ----
+            _Global_nexelpy_var.__starlette__ = self.app
+            #-----------------mount static file ----
             self.app.mount("/root",MyStaticFiles(directory=Path(file).resolve().parent),name="static")
-
-            #---------session middleware---------
+            #-----------------session middleware---------
             fernet_key = Fernet.generate_key()     
             _Global_nexelpy_var.FERNET = Fernet(fernet_key)
             self.app.add_middleware(NexelpySessionMiddleware)
-            #------------------------------------
+            #-----------------Auto scanner-------------
             ModuleScanner().run()
             ModuleInspector.run()
             ModuleRunHasDecorator.run()
@@ -59,22 +54,13 @@ class MainAppBuilder:
             console.print(f"\n[yellow]{datetime.now().strftime('%H:%M:%S')}[/yellow] [bold green](nexelpy successful find):[/bold green]")
             console.print(f"                [blue]{len(_Global_nexelpy_var.AutoRegister_list)}[/blue] AutoRegister Route")
             console.print(f"                [blue]{len(_Global_nexelpy_var.manualRegister_list)}[/blue] manualRegister Route")
-            self.registr_root_list()
-
-            # config = NormTempsConfig(templates_root="./templates",url_prefix="/root/templates")
-            # NormTemps(config).run()
+            self._registr_root_list()
 
     #----------------------
-    #----------------------
-    def registr_root_list(self):
-        if _Global_nexelpy_var.manualRegister_list:
-            for reg in _Global_nexelpy_var.manualRegister_list:
-                self.app.add_route(reg["path"], wraper_handler(reg["handler"]), methods=reg["method"])
+    def _registr_root_list(self):
         if _Global_nexelpy_var.AutoRegister_list:
             for reg in _Global_nexelpy_var.AutoRegister_list:
                 self.app.add_route(reg["path"], wraper_handler(reg["handler"]), methods=reg["method"])
-
-    #----------------------
     #----------------------
     def run(self,host="127.0.0.1",port=8000,):
         env = detect_runtime_env()

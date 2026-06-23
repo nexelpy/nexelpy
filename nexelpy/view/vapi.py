@@ -17,8 +17,7 @@ class Vapi(PluginBuilder):
                 "jsCode":None,
                 "view": self.elementsContainer.content}
 
-        self.responseHeader["Content-Security-Policy"] = self.responseHeader.get("Content-Security-Policy","").replace("default-src 'self';", f"default-src 'self' {' '.join(self._content_Security_Policy_list)};") if self._content_Security_Policy_list else self.responseHeader.get("Content-Security-Policy","")
-        response = JSONResponse(content= json.dumps(final_data, ensure_ascii=False) ,status_code=200,headers=self.responseHeader)
+        response = JSONResponse(content= json.dumps(final_data, ensure_ascii=False) ,status_code=200,headers=self.Headers.build_header())
         for cookie in self._cookies_list:
             params = {k: v for k, v in cookie.items() if v is not None}
             response.set_cookie(**params)

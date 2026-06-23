@@ -1,21 +1,3 @@
-# import importlib
-# from . import _Global_nexelpy_var
-
-# class ModuleRunHasDecorator:
-#     @staticmethod
-#     def run():
-#         for module in _Global_nexelpy_var.inspect_python_file:
-#             try:
-#                 importlib.import_module(module)
-#             except Exception as e:
-#                 from datetime import datetime
-#                 now = datetime.now()
-#                 date = now.strftime("%Y-%m-%d")
-#                 time = now.strftime("%H:%M:%S")
-#                 _Global_nexelpy_var.erorr.append({"class":"ModuleRunHasDecorator","date":date,"time":time,"e":e})
-
-
-
 import importlib,traceback,sys
 from rich.console import Console
 from .. import _Global_nexelpy_var

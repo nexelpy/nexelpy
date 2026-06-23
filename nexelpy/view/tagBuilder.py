@@ -19,7 +19,7 @@ class TagBuilder:
     @property
     def build_tag(self):
         tag = self.tagName
-        attrs = " ".join(f'{k.replace("Class","class").replace("__","-")}="{str(v).replace("\"","\'")}"' for k, v in self.attribute.items()) if self.attribute else ""
+        attrs = " ".join(f'{k.lower().replace("__","-")}="{str(v).replace("\"","\'")}"' for k, v in self.attribute.items()) if self.attribute else ""
         vla = self.props
         if self.selfClose:
             return f"<{tag}{(' ' + attrs) if attrs else ''}{(' ' + vla) if vla else ''}/>"

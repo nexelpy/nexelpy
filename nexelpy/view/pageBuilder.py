@@ -1,5 +1,4 @@
 from .pluginBuilder import PluginBuilder
-from ..mediator import _Global_nexelpy_var
 from starlette.responses import HTMLResponse
 
 
@@ -27,7 +26,7 @@ class PageBilder(PluginBuilder):
         [self.link(parent=self.HEAD, href= url , **attrs) for (url, attrs) in self._css_files]
         [self.script(parent=self.HEAD, src= url , **attrs) for (url, attrs) in self._js_files]
 
-        response = HTMLResponse(content=self.elementsContainer.content,status_code=200,headers=self.Headers.build_header( ),media_type="text/html")
+        response = HTMLResponse(content=self.elementsContainer.content,status_code=200,headers=self.Headers.build_header(),media_type="text/html")
         
         for cookie in self._cookies_list:
             params = {k: v for k, v in cookie.items() if v is not None}

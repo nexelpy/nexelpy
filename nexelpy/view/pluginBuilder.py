@@ -3,7 +3,7 @@ from .importerExporter import Importer
 from ..mediator.reDirect import redirect_now
 from urllib.parse import urlencode
 from .setCookieSession import SetCookieSession
-from ..headerBuilder.headerBuilder import HeaderBuilder
+from ..mediator.headerBuilder.headerBuilder import HeaderBuilder
 
 class PluginBuilder(Importer,SetCookieSession,FormBuilder): 
     def __init__(self):

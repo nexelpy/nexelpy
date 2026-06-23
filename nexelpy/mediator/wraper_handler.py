@@ -1,7 +1,7 @@
 
 from .request_proxy.request_object import set_request, reset_request
 from . import _Global_nexelpy_var
-from ..nexel_routes import show_erorr_in_page
+from .show_erorr_in_page import show_errrr
 import traceback
 from .reDirect import RedirectException
 
@@ -24,7 +24,8 @@ def wraper_handler(handler):
             code = last.line
             
             _Global_nexelpy_var.erorr.append({"time":now,"e":e})
-            return await show_erorr_in_page.show_errrr({"time":now,"e":e,"filename":filename,"line number":lineno,"code":code})
+            if _Global_nexelpy_var.dev_Mode:
+                return await show_errrr({"Time":now,"Erorr":e,"Module path":"/root"+filename,"Line number":lineno,"Code":code})
 
         finally:
             reset_request(token)
