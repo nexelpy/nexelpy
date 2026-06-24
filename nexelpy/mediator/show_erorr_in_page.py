@@ -13,8 +13,7 @@ from nexelpy.view import pageBuilder
 
 async def show_errrr(errrr):
     x = pageBuilder.PageBilder()
-    x.STYLE.text="""
-
+    x.STYLE_tag.text = """
 body {
     background-color: rgb(20, 20, 20);
     color: white;

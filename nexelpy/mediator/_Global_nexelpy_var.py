@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-
+nexelpyOBJ = None
 root_progect = None
 project_root_dir =None
 dev_Mode = None
@@ -14,10 +14,6 @@ scan_python_file = []
 inspect_python_file = []
 AutoRegister_list = []
 manualRegister_list = []
-
-__MAINAPP__ = None
-__starlette__ = None
-__DB__ = {}
 
 
 erorr = []

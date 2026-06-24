@@ -37,7 +37,7 @@ SELF_CLOSING_TAGS = [
 ]
 
 NORMAL_TAGS = [
-    "script","iframe","video","audio","a",
+    "script","iframe","video","audio","a","style",
     "address", "article", "aside", "footer", "header", "h1", "h2", "h3",
     "h4", "h5", "h6", "hgroup", "main", "nav", "section",
     "blockquote", "dd", "div", "dl", "dt", "figcaption", "figure",

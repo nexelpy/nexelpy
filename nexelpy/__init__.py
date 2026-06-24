@@ -8,3 +8,6 @@ from .mediator.mainAppBuilder import MainAppBuilder as MainApp
 
 from .mediator.headerBuilder.headerBuilder import HeaderBuilder as Headers
 from .mediator.request_proxy.requestProxy import request as REQUEST
+
+from .mediator import _Global_nexelpy_var 
+nexelpyOBJ = _Global_nexelpy_var.nexelpyOBJ

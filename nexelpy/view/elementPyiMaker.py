@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any, Optional
 
 SELF_CLOSING_TAGS = [
     "area", "base", "br", "col", "embed",
@@ -6,10 +7,14 @@ SELF_CLOSING_TAGS = [
     "param", "source", "track", "wbr",
 ]
 
+SPECIAL_TAGS = {
+    "script": "code",
+    "style": "css",
+}
+
 NORMAL_TAGS = [
-    "style",
-    "address", "article", "aside", "footer", "header", "h1", "h2", "h3",
-    "h4", "h5", "h6", "hgroup", "main", "nav", "section",
+    "address", "article", "aside", "footer","script","style",
+    "h1", "h2", "h3", "h4", "h5", "h6", "hgroup", "main", "nav", "section",
     "blockquote", "dd", "div", "dl", "dt", "figcaption", "figure",
     "li", "menu", "ol", "p", "pre", "ul",
     "a", "abbr", "b", "bdi", "bdo", "cite", "code", "data", "dfn",
@@ -17,7 +22,7 @@ NORMAL_TAGS = [
     "small", "span", "strong", "sub", "sup", "time", "u", "var",
     "audio", "canvas", "video",
     "iframe", "object", "picture",
-    "script", "noscript",
+    "noscript",
     "caption", "colgroup", "table", "tbody", "td", "tfoot", "th", "thead", "tr",
     "button", "datalist", "fieldset", "label", "legend", "meter",
     "optgroup", "option", "output", "progress", "select", "textarea",
@@ -25,28 +30,34 @@ NORMAL_TAGS = [
     "Del", "ins",
 ]
 
-
-
 all_tags = NORMAL_TAGS + SELF_CLOSING_TAGS
 
-header = f"""
-from typing import Union,Optional,Any
+header = f'''# pyi for elements
+from typing import Union, Optional, Any
 from .tagBuilder import TagBuilder, RawHTML
 
 class ElementBuilder:
     def __init__(self) -> None: ...
     def raw(self, html: str, parent: Optional[TagBuilder] = None) -> RawHTML: ...
-    def element(self,tagName:str="empty-tag",text:Any="",selfClose:bool=False,props:str="",parent:Optional[TagBuilder]=None,id: Optional[str] = "",Class: Optional[str] = "",style: Optional[str] = "",src: Optional[str] = "",href: Optional[str] = "",Type: Optional[str] = "",name: Optional[str] = "",value: Optional[str] = "",**attributes: Any) -> TagBuilder: ...
-   
-"""
+    def element(self, tagName: str = "empty-tag", text: Any = "", selfClose: bool = False, props: str = "", parent: Optional[TagBuilder] = None, **attributes: Any) -> TagBuilder: ...
+'''
 
 methods = []
+
 for tag in all_tags:
-    methods.append(f'    def {tag}(self,text:Any="",props:str="",parent:Optional[TagBuilder]=None,id: Optional[str] = "",Class: Optional[str] = "",style: Optional[str] = "",src: Optional[str] = "",href: Optional[str] = "",Type: Optional[str] = "",name: Optional[str] = "",value: Optional[str] = "",**attributes: Any) -> TagBuilder: ...')
+    if tag in SPECIAL_TAGS:
+        # تگ‌های خاص با پارامتر متفاوت
+        param_name = SPECIAL_TAGS[tag]
+        methods.append(f'    def {tag}(self, {param_name}: Any = "", props: str = "", parent: Optional[TagBuilder] = None, **attributes: Any) -> TagBuilder: ...')
+    else:
+        # تگ‌های معمولی با پارامتر 'text'
+        methods.append(f'    def {tag}(self, text: Any = "", props: str = "", parent: Optional[TagBuilder] = None, **attributes: Any) -> TagBuilder: ...')
+
 content = header + "\n" + "\n".join(methods) + "\n"
 
-Path("elementBuilder.pyi").write_text(content, encoding="utf-8")
-print("elementBuilder.pyi generated.")
+file_path = Path(__file__).parent / "elementBuilder.pyi"
+file_path.write_text(content, encoding="utf-8")
+print(f"elementBuilder.pyi generated at {file_path}")
 
 
 

@@ -9,8 +9,6 @@ class NexelpySessionMiddleware:
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        # print(">>> Middleware entered!", scope["type"])
-
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
 
@@ -30,7 +28,6 @@ class NexelpySessionMiddleware:
                     session_data = json.loads(decrypted)
                 except (InvalidToken, json.JSONDecodeError):
                     session_data = {}
-        # print(f"DEBUG: Session data found: {session_data}")
         scope.setdefault("state", {})
         scope["state"]["n-session"] = session_data
 
