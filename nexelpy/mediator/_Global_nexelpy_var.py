@@ -1,31 +1,13 @@
 from datetime import datetime
 
 
-nexelpyOBJ = None
-root_progect = None
-project_root_dir =None
-dev_Mode = None
-
-
-FERNET = None
-
-
-scan_python_file = []
-inspect_python_file = []
-AutoRegister_list = []
-manualRegister_list = []
-
-
 erorr = []
 def erorr_append(ClassName,e):
-    if dev_Mode :
         now = datetime.now().strftime("%H:%M:%S")
         er_dict = {"class":ClassName,"date":now,"e":e}
         erorr.append(er_dict)
         return er_dict
     
-
-
 
 
 STRICT_GLOBAL_HEADERS = {

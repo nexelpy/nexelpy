@@ -1,8 +1,7 @@
 from datetime import datetime
 from typing import Literal
 import json
-from ..mediator import _Global_nexelpy_var
-
+from ..mediator.session_proxy.session_middleware import SessionManager
 
 class SetCookieSession:
     def __init__(self):
@@ -19,8 +18,7 @@ class SetCookieSession:
                    samesite: Literal["lax", "strict", "none"] | None = "lax",partitioned: bool = False):
         self._cookies_list.append({"key":key,"value":value,"max_age":max_age,"expires":expires,"path":path,"domain":domain,"secure":secure,"httponly":httponly,"samesite":samesite,"partitioned":partitioned })
 
-    def set_Session(self, **kw): 
-        session_json = json.dumps(kw)
-        encrypted_session = _Global_nexelpy_var.FERNET.encrypt(session_json.encode())
-        session_value = encrypted_session.decode()
-        self.setCookie(key="n-session",value=session_value,path="/",secure=True,httponly=True,samesite="lax",max_age=3600 * 24 * 7)
+
+    def set_session(self, path="/",secure=True,httponly=True,samesite="strict", max_age=3600 * 24 * 1,**data):
+        encrypted = SessionManager.encrypt(data)
+        self.set_Cookie(key="n-session",value=encrypted,path=path,secure=secure, httponly=httponly,samesite=samesite,max_age=max_age)

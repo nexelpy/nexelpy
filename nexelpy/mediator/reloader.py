@@ -1,15 +1,17 @@
 from __future__ import annotations
-
 import os
 import sys
 import time
 import subprocess
-
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, Optional, Sequence
 
-
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
+from rich.align import Align
+console = Console()
 # =========================================================
 # runtime env
 # =========================================================
@@ -117,23 +119,13 @@ class Reloader:
     # =====================================================
 
     def _iter_files(self) -> Iterable[Path]:
-
-        for root, dirs, files in os.walk(
-            self.watch_dir,
-            followlinks=False,
-        ):
-
-            dirs[:] = [
-                d for d in dirs
-                if d not in self.ignore_dirs
-            ]
-
+        for root, dirs, files in os.walk(self.watch_dir, followlinks=False):
+            dirs[:] = [d for d in dirs if d not in self.ignore_dirs]
             root_path = Path(root)
-
             for file_name in files:
-
                 path = root_path / file_name
-
+                if "__pycache__" in path.parts:
+                    continue
                 if path.suffix.lower() in self.exts:
                     yield path
 
@@ -195,11 +187,8 @@ class Reloader:
             sys.executable,
             str(self.entry_file),
         ]
-
-        self.logger(
-            f"[NexelPy:Reloader] nexelpy serve on http://127.0.0.1:8000 " #-> {' '.join(cmd)}"
-        )
-
+        
+        self.logger("=" * 80)
         return subprocess.Popen(
             cmd,
             env=env,
@@ -219,9 +208,7 @@ class Reloader:
 
         if self._child.poll() is None:
 
-            self.logger(
-                "[NexelPy:Reloader] stopping child..."
-            )
+            # self.logger("[NexelPy:Reloader] stopping child...")
 
             self._child.terminate()
 
@@ -261,9 +248,7 @@ class Reloader:
 
         self._last_reload = now
 
-        self.logger(
-            f"[NexelPy:Reloader] {reason} -> reload"
-        )
+        # self.logger(f"[NexelPy:Reloader] {reason} -> reload")
 
         self._stop_child()
 
@@ -277,70 +262,42 @@ class Reloader:
     # =====================================================
 
     def run(self) -> None:
+        logo_text = Text("nexelpy", style="bold purple", justify="center")
+        panel = Panel(Align.center(logo_text),border_style="purple", width=80 ,padding=(0, 1) )
+        console.print(panel)
+        console.print(f"[bold][NexelPy Registration][/bold] [yellow]watching:[/yellow] {self.watch_dir} [yellow]directory[/yellow] ")
+        
 
-        self.logger(
-            f"[NexelPy:Reloader] watching: {self.watch_dir} "
-        )
-
-        # self.logger(
-        #     f"[NexelPy:Reloader] extensions: {self.exts}"
-        # )
-
-        last_state = self._snapshot()
 
         self._child = self._spawn_child()
+        time.sleep(0.5)
+        last_state = self._snapshot()
 
         try:
-
             while True:
-
                 time.sleep(self.poll_interval)
 
-                # -----------------------------------------
-                # child crash / exit
-                # -----------------------------------------
-
                 if self._child and self._child.poll() is not None:
-
                     code = self._child.returncode
 
-                    self.logger(
-                        f"[NexelPy:Reloader] child exited ({code})"
-                    )
+                    if code != 0:
+                        console.print(f"[bold][NexelPy Reloader][/bold] [red]server exited and Stopping due error .[/red] [yellow]Fix the issue and restart manually.[/yellow] ")
+                        break
 
-                    if self.restart_on_child_exit:
+                    else:
+                        self.logger(f"[NexelPy:Reloader] child exited normally ({code})")
+                        break
 
-                        time.sleep(self.restart_delay)
-
-                        self._child = self._spawn_child()
-
-                        last_state = self._snapshot()
-
-                    continue
-
-                # -----------------------------------------
-                # detect file changes
-                # -----------------------------------------
 
                 current_state = self._snapshot()
-
                 if self._has_changes(current_state, last_state):
-
                     last_state = current_state
-
                     self._restart("change detected")
-
-                    # refresh snapshot after reload
-                    time.sleep(0.2)
-
+                    time.sleep(0.5)
                     last_state = self._snapshot()
 
         except KeyboardInterrupt:
-
-            self.logger(
-                "\n[NexelPy:Reloader] stopped by user"
-            )
-
+            pass
+            # self.logger("\n[NexelPy:Reloader] stopped by user")
         finally:
-
             self._stop_child()

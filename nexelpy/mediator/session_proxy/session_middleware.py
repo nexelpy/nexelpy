@@ -1,7 +1,5 @@
-import json
 from http.cookies import SimpleCookie
-from cryptography.fernet import InvalidToken
-from .. import _Global_nexelpy_var as g
+from .sessionManager import SessionManager
 
 
 class NexelpySessionMiddleware:
@@ -13,21 +11,16 @@ class NexelpySessionMiddleware:
             return await self.app(scope, receive, send)
 
         session_data = {}
-
         headers = dict(scope.get("headers", []))
         cookie_header = headers.get(b"cookie")
 
-        if cookie_header and g.FERNET:
+        if cookie_header:
             cookie = SimpleCookie()
             cookie.load(cookie_header.decode())
-
             if "n-session" in cookie:
                 token = cookie["n-session"].value
-                try:
-                    decrypted = g.FERNET.decrypt(token.encode()).decode()
-                    session_data = json.loads(decrypted)
-                except (InvalidToken, json.JSONDecodeError):
-                    session_data = {}
+                session_data = SessionManager.decrypt(token)
+
         scope.setdefault("state", {})
         scope["state"]["n-session"] = session_data
 

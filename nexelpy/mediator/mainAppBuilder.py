@@ -1,11 +1,7 @@
-from . import _Global_nexelpy_var
-from .registerations.moduleScanner import ModuleScanner
-from .registerations.moduleInspector import ModuleInspector
-from .registerations.moduleRunHasDecorator import ModuleRunHasDecorator
 from .wraper_handler import wraper_handler
 from .reloader import Reloader, detect_runtime_env, is_production_like
 from starlette.applications import Starlette
-import uvicorn,sys
+import uvicorn
 from rich.console import Console
 from datetime import datetime
 from .session_proxy.session_middleware import NexelpySessionMiddleware
@@ -15,6 +11,13 @@ from starlette.staticfiles import StaticFiles
 from pathlib import Path
 import os
 from starlette.responses import PlainTextResponse
+from .registerations.regestrationBuilder import RegistrationBuilder
+from .session_proxy.session_middleware import SessionManager
+
+
+console = Console()
+
+
 
 
 class nexelStaticFiles(StaticFiles):
@@ -28,58 +31,45 @@ class nexelStaticFiles(StaticFiles):
 
 
 class MainAppBuilder(Starlette):
-    def __init__(self, file=__file__, devMode=True):
+    def __init__(self, file=__file__, devMode=True,secretKey=None):
         super().__init__(exception_handlers={ RedirectException: redirect_exception_handler })
-        
-        if _Global_nexelpy_var.root_progect is not None:
-            print("nexelpy run in another project, try with venv.")
-            return
-        
-        _Global_nexelpy_var.root_progect = file
-        self.root_dir = os.path.dirname(os.path.abspath(file))
-        _Global_nexelpy_var.project_root_dir = self.root_dir
-        _Global_nexelpy_var.dev_Mode = devMode
-        _Global_nexelpy_var.nexelpyOBJ = self
-        
+        self.file = file
+        self.root_Path = os.path.dirname(os.path.abspath(file))
+        self.devMode = devMode
+
         # mount static
         self.mount("/root", nexelStaticFiles(directory=Path(file).resolve().parent), name="static")
-        
+
         # session middleware
-        fernet_key = Fernet.generate_key()
-        self.secretKey = Fernet(fernet_key)
-        _Global_nexelpy_var.FERNET = self.secretKey
+        if secretKey is None:
+            secretKey = Fernet.generate_key()
+        SessionManager.initialize(secretKey)
         self.add_middleware(NexelpySessionMiddleware)
-        
+
         # Auto scanner
-        ModuleScanner().run()
-        ModuleInspector.run()
-        ModuleRunHasDecorator.run()
-        console = Console()
-        console.print(f"\n[yellow]{datetime.now().strftime('%H:%M:%S')}[/yellow] [bold green](nexelpy successful find):[/bold green]")
-        console.print(f"                [blue]{len(_Global_nexelpy_var.AutoRegister_list)}[/blue] AutoRegister Route")
-        console.print(f"                [blue]{len(_Global_nexelpy_var.manualRegister_list)}[/blue] manualRegister Route")
-        self._registr_root_list()
+        if Reloader.is_child(): 
+            self.AutoRegister_list = RegistrationBuilder(file).run()
+            # console.print(f"\n[yellow]{datetime.now().strftime('%H:%M:%S')}[/yellow] [bold green](nexelpy successful find):[/bold green]")
+            # console.print(f"                [blue]{len(self.AutoRegister_list)}[/blue] AutoRegister Route")
+            console.print("=" * 80) 
+            self._registr_root_list()
+        else:
+            self.auto_routes = []
 
     #----------------------
     def _registr_root_list(self):
-        if _Global_nexelpy_var.AutoRegister_list:
-            for reg in _Global_nexelpy_var.AutoRegister_list:
+        if self.AutoRegister_list:
+            for reg in self.AutoRegister_list:
                 self.add_route(reg["path"], wraper_handler(reg["handler"]), methods=reg["method"])
+
     #----------------------
-    def run(self,host="127.0.0.1",port=8000,):
-        env = detect_runtime_env()
-
-        if is_production_like(env):
-            uvicorn.run(self,host=host,port=port,access_log=False,log_level="warning")
-            return
-
-        if Reloader.is_child():
-            uvicorn.run(self,host=host,port=port,access_log=False,log_level="warning")
-            return
-
-        entry_file = sys.modules["__main__"].__file__
-        reloader = Reloader(entry_file=entry_file)
-        reloader.run()
-
     def simple_run(self):
         uvicorn.run(self)
+    #----------------------
+    def run(self, host="127.0.0.1", port=8000):
+        if self.devMode and not Reloader.is_child():
+            reloader = Reloader(entry_file=self.file)
+            reloader.run()
+        else:
+            import uvicorn
+            uvicorn.run(self, host=host, port=port)
