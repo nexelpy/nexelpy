@@ -31,7 +31,7 @@ class MainAppBuilder(Starlette):
     def __init__(self, file=__file__, devMode=True):
         super().__init__(exception_handlers={ RedirectException: redirect_exception_handler })
         
-        if _Global_nexelpy_var.nexelpyOBJ is not None:
+        if _Global_nexelpy_var.root_progect is not None:
             print("nexelpy run in another project, try with venv.")
             return
         
@@ -46,7 +46,8 @@ class MainAppBuilder(Starlette):
         
         # session middleware
         fernet_key = Fernet.generate_key()
-        _Global_nexelpy_var.FERNET = Fernet(fernet_key)
+        self.secretKey = Fernet(fernet_key)
+        _Global_nexelpy_var.FERNET = self.secretKey
         self.add_middleware(NexelpySessionMiddleware)
         
         # Auto scanner

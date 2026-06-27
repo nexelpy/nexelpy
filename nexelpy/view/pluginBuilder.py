@@ -4,11 +4,13 @@ from ..mediator.reDirect import redirect_now
 from urllib.parse import urlencode
 from .setCookieSession import SetCookieSession
 from ..mediator.headerBuilder.headerBuilder import HeaderBuilder
+from .quickEvents.quickEventsBuilder import QuickEvents
 
 class PluginBuilder(Importer,SetCookieSession,FormBuilder): 
     def __init__(self):
         super().__init__()
         self.Headers = HeaderBuilder()
+        self.QuickEvents = QuickEvents()
 
     def redirect(self, url: str, status_code: int = 307, **kwargs):
         if kwargs:

@@ -16,6 +16,9 @@ class RequestProxy:
     
     async def scope(self, *keys):
         return self._pick(self._get_original_request().scope, *keys)
+    
+    async def mainApp(self, *keys):
+        return await self.scope("app")
 
     async def method(self) -> str:
         return self._get_original_request().method
@@ -58,18 +61,13 @@ class RequestProxy:
         form = await self._get_original_request().form()
         return self._pick(dict(form), *keys)
 
-    def stream(self): # request.stream() is a low‑level body reader and consumes the request body. After using it, body(), json(), or form() may no longer work.
+    async def stream(self): # request.stream() is a low‑level body reader and consumes the request body. After using it, body(), json(), or form() may no longer work.
         return self._get_original_request().stream()
     
     async def session(self, *keys):
         request = self._get_original_request()
         session_data = request.scope.get("state", {}).get("n-session", {})
         return self._pick(session_data, *keys)
-
-
-
-        
-
 
     async def payload(self, method, *keys):
         method = method.upper()
@@ -79,5 +77,6 @@ class RequestProxy:
             "JSON": self.json,
             "POST": self.form}
         return await handlers.get(method,None)(*keys)
+    
 
 request = RequestProxy()

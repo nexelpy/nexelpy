@@ -25,6 +25,12 @@ class PageBilder(PluginBuilder):
     def RESPONSE(self):
         [self.link(parent=self.HEAD_tag, href= url , **attrs) for (url, attrs) in self._css_files]
         [self.script(parent=self.HEAD_tag, src= url , **attrs) for (url, attrs) in self._js_files]
+        exQE = self.QuickEvents.export
+        if exQE:
+            self.script(text=exQE,type="module")
+        if self._QE_object:
+            for i in self._QE_object:
+                self.script(text=i.export,type="module")
 
         response = HTMLResponse(content=self.elementsContainer.content,status_code=200,headers=self.Headers.build_header(),media_type="text/html")
         
