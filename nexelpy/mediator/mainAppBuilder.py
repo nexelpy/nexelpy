@@ -18,7 +18,13 @@ from .session_proxy.session_middleware import SessionManager
 console = Console()
 
 
+import logging
 
+class UvicornAccessFilter(logging.Filter):
+    def filter(self, record):
+        msg = record.getMessage()
+        ignored_paths = ["/.well-known/",]
+        return not any(path in msg for path in ignored_paths)
 
 class nexelStaticFiles(StaticFiles):
     async def __call__(self, scope, receive, send):
@@ -72,4 +78,5 @@ class MainAppBuilder(Starlette):
             reloader.run()
         else:
             import uvicorn
+            logging.getLogger("uvicorn.access").addFilter(UvicornAccessFilter())
             uvicorn.run(self, host=host, port=port)

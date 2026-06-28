@@ -9,8 +9,10 @@ def wraper_handler(handler):
     async def endpoint(request):
 
         token = set_request(request)
-        try:
+        
+        try: 
             return await handler()
+        
         
         except RedirectException:
             raise
@@ -24,7 +26,8 @@ def wraper_handler(handler):
             code = last.line
             
             _Global_nexelpy_var.erorr.append({"time":now,"e":e})
-            if _Global_nexelpy_var.dev_Mode:
+            mainapp = request.scope.get("app")
+            if mainapp.devMode:
                 return await show_errrr({"Time":now,"Erorr":e,"Module path":"/root"+filename,"Line number":lineno,"Code":code})
 
         finally:

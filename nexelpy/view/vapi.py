@@ -1,22 +1,39 @@
 import json
 from .pluginBuilder import PluginBuilder
-from ..mediator import _Global_nexelpy_var
 from starlette.responses import JSONResponse
 
 class Vapi(PluginBuilder):
-    def __init__(self, headerConfig=_Global_nexelpy_var.STRICT_GLOBAL_HEADERS):
+    def __init__(self, ):
         super().__init__()
-        self.responseHeader = headerConfig
+        
 
     def RESPONSE(self,**data):
+        
+        css_links = []
+        for href, attrs in self._css_files.items():
+            attrs_str = " ".join(f'{k}="{v}"' for k, v in attrs.items())
+            css_links.append(f'<link href="{href}" {attrs_str} />')
+        js_scripts = []
+        for src, attrs in self._js_files.items():
+            attrs_str = " ".join(f'{k}="{v}"' for k, v in attrs.items())
+            js_scripts.append(f'<script src="{src}" {attrs_str}></script>')
+
+        exQE = self.QuickEvents.export # export current QE 
+        if exQE:
+            self.script(text=exQE,type="module")
+
+        if self._QE_objects: # export QE of other plugin
+            for i in self._QE_objects:
+                self.script(text=i.export,type="module")
+
         final_data = {
                 "data": data,
-                "cssLink":[(self._path_generate(url),attrs) for (url, attrs) in self._css_files] or None, 
-                "jsLink":[(self._path_generate(url),attrs) for (url, attrs) in self._js_files] or None, 
-                "ntgLink":None,
-                "jsCode":None,
-                "view": self.elementsContainer.content}
+                "css-links" : "".join(css_links),
+                "js-links": "".join(js_scripts),
+                "view": self.elementsContainer.content
+                }
 
+        
         response = JSONResponse(content= json.dumps(final_data, ensure_ascii=False) ,status_code=200,headers=self.Headers.build_header())
         for cookie in self._cookies_list:
             params = {k: v for k, v in cookie.items() if v is not None}

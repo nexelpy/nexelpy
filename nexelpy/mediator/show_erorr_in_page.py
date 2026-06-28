@@ -1,15 +1,5 @@
 from nexelpy.view import pageBuilder
 
-# async def show_errrr(errrr):
-#     x = pageBuilder.PageBilder()
-#     x.BODY.attribute["style"]="background-color:rgb(20, 20, 20);color:white;"
-#     x.h2("nexelpy erorr",style="background-color:red;color:white;padding:1.5rem;margin:1rem 2rem;")
-#     with x.ul():
-#         for i in errrr:
-#             x.li(f"{i} : {errrr[i]}",style="margin:1rem 2rem;")
-#     return x.RESPONSE()
-
-
 
 async def show_errrr(errrr):
     x = pageBuilder.PageBilder()
