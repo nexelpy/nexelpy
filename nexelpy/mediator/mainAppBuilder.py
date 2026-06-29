@@ -62,6 +62,12 @@ class MainAppBuilder(Starlette):
         else:
             self.auto_routes = []
 
+        # ceate .nexelpy file for find root in page and plugins
+        root_dir = Path(self.file).resolve().parent
+        nexelpy_file = root_dir / ".nexelpy"
+        if not nexelpy_file.exists():
+            nexelpy_file.touch()
+
     #----------------------
     def _registr_root_list(self):
         if self.AutoRegister_list:

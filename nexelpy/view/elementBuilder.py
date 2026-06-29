@@ -1,8 +1,8 @@
 from .parentResolverBase import ParentResolverBase
 from .tagBuilder import TagBuilder,RawHTML
+from .pathBuilder import PathBuilder
 
-
-class ElementBuilder(ParentResolverBase):
+class ElementBuilder(ParentResolverBase,PathBuilder):
     def __init__(self):
         super().__init__()
         self.elementsContainer = TagBuilder(tagName="elementsContainer")
@@ -14,6 +14,7 @@ class ElementBuilder(ParentResolverBase):
         return node
 
     def element(self, tagName="empty", text="", selfClose=False, props="", parent=None, **attributes):
+        self._normalize_paths(attributes)
         tag = TagBuilder(tagName=tagName, text=text, selfClose=selfClose, props=props,parent=self.setParent(parent), **attributes)
         tag.builder = self
         return tag

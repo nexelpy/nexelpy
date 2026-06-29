@@ -1,29 +1,34 @@
 from ..mediator.request_proxy.requestProxy import request
 from .setCookieSession import SetCookieSession
 from .pathBuilder import PathBuilder
-import mimetypes
+import mimetypes,os
 from starlette.background import BackgroundTask
 from starlette.responses import FileResponse, JSONResponse,PlainTextResponse,StreamingResponse,Response,RedirectResponse
 from typing import AsyncIterable
 from ..mediator.headerBuilder.headerBuilder import HeaderBuilder
 
-class RestApi(SetCookieSession,PathBuilder):
+class RestApi(SetCookieSession):
     def __init__(self):
         super().__init__()
         self.REQUEST = request
         self.Headers = HeaderBuilder()
+        self._pathBuilder = PathBuilder()
     
-    def RESPONSEfile(self, type, path, backgroundTask=None, disposition="attachment"):
-        response = FileResponse(
-            self._resolve_file_path(path),
-            status_code=200,
-            headers=self.Headers.build_header(),
-            media_type= type if "/" in type else mimetypes.guess_type(f"file.{type}")[0],
-            background=BackgroundTask(backgroundTask) if callable(backgroundTask) else backgroundTask,
-            content_disposition_type=disposition,
-        )
-        self._set_cookielist_to_response(response)
-        return response
+    def RESPONSEfile(self, path, type="", backgroundTask=None, disposition="attachment"):
+            resolved_path = self._pathBuilder._resolve_file_path(path)
+            if not os.path.isfile(resolved_path):
+                return Response(status_code=404, content="File not found")
+            response = FileResponse(
+                resolved_path,
+                status_code=200,
+                headers=self.Headers.build_header(),
+                media_type=type if "/" in type else mimetypes.guess_type(f"file.{type}")[0],
+                background=BackgroundTask(backgroundTask) if callable(backgroundTask) else backgroundTask,
+                content_disposition_type=disposition,
+            )
+            self._set_cookielist_to_response(response)
+            return response
+
 
     def RESPONSEjason(self,backgroundTask=None, **data):
         response = JSONResponse(
