@@ -1,5 +1,5 @@
 from .wraper_handler import wraper_handler
-from .reloader import Reloader, detect_runtime_env, is_production_like
+from .reloader import Reloader
 from starlette.applications import Starlette
 import uvicorn
 from rich.console import Console
@@ -31,7 +31,7 @@ class nexelStaticFiles(StaticFiles):
         if "/static/" not in scope["path"]:
             response = PlainTextResponse("Not Found", status_code=404)
             await response(scope, receive, send)
-            return
+            return 
         await super().__call__(scope, receive, send)
 
 
@@ -43,8 +43,6 @@ class MainAppBuilder(Starlette):
         self.root_Path = os.path.dirname(os.path.abspath(file))
         self.devMode = devMode
 
-        # mount static
-        self.mount("/root", nexelStaticFiles(directory=Path(file).resolve().parent), name="static")
 
         # session middleware
         if secretKey is None:
@@ -55,8 +53,6 @@ class MainAppBuilder(Starlette):
         # Auto scanner
         if Reloader.is_child(): 
             self.AutoRegister_list = RegistrationBuilder(file).run()
-            # console.print(f"\n[yellow]{datetime.now().strftime('%H:%M:%S')}[/yellow] [bold green](nexelpy successful find):[/bold green]")
-            # console.print(f"                [blue]{len(self.AutoRegister_list)}[/blue] AutoRegister Route")
             console.print("=" * 80) 
             self._registr_root_list()
         else:
@@ -68,6 +64,8 @@ class MainAppBuilder(Starlette):
         if not nexelpy_file.exists():
             nexelpy_file.touch()
 
+        # mount static
+        self.mount("/", nexelStaticFiles(directory=Path(file).resolve().parent), name="static")
     #----------------------
     def _registr_root_list(self):
         if self.AutoRegister_list:

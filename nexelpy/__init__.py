@@ -1,3 +1,4 @@
+
 from .mediator.registerations.decorators import AutoRegister
 from .view.pluginBuilder import PluginBuilder as Plugin
 from .view.pageBuilder import PageBilder as Page
