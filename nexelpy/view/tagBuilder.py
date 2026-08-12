@@ -55,5 +55,3 @@ class RawHTML:
     @property
     def build_tag(self):
         return self.html
-    
-

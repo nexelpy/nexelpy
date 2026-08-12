@@ -1,21 +1,21 @@
 from ..mediator.request_proxy.requestProxy import request
-from .setCookieSession import SetCookieSession
-from .pathBuilder import PathBuilder
+# from .setCookieSession import SetCookieSession
+# from .pathBuilder import PathBuilder
 import mimetypes,os
 from starlette.background import BackgroundTask
 from starlette.responses import FileResponse, JSONResponse,PlainTextResponse,StreamingResponse,Response,RedirectResponse
 from typing import AsyncIterable
 from ..mediator.headerBuilder.headerBuilder import HeaderBuilder
 
-class RestApi(SetCookieSession):
+class RestApi():#SetCookieSession#########################
     def __init__(self):
         super().__init__()
         self.REQUEST = request
         self.Headers = HeaderBuilder()
-        self._pathBuilder = PathBuilder()
+        # self._pathBuilder = PathBuilder() ##########################################
     
     def RESPONSEfile(self, path, type="", backgroundTask=None, disposition="attachment"):
-            resolved_path = self._pathBuilder._resolve_file_path(path)
+            resolved_path = self._pathBuilder._resolve_file_path(path)##############################################
             if not os.path.isfile(resolved_path):
                 return Response(status_code=404, content="File not found")
             response = FileResponse(

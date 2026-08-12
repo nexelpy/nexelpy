@@ -1,21 +1,25 @@
-from .parentResolverBase import ParentResolverBase
 from .tagBuilder import TagBuilder,RawHTML
-from .pathBuilder import PathBuilder
 
-class ElementBuilder(ParentResolverBase,PathBuilder):
+class ElementBuilder():
     def __init__(self):
         super().__init__()
+        self._parent_stack = []
         self.elementsContainer = TagBuilder(tagName="elementsContainer")
-        self.elementsContainer.builder = self
-        
+        # self.elementsContainer.builder = self
+
+    def _setParent(self, parent=None):
+        if parent is not None:
+            return parent
+        stack = self._parent_stack
+        return stack[-1] if stack else self.BODY_tag
+    
     def raw(self, html, parent=None):
-        node = RawHTML(html, parent=self.setParent(parent))
+        node = RawHTML(html, parent=self._setParent(parent))
         node.builder = self
         return node
 
     def element(self, tagName="empty", text="", selfClose=False, props="", parent=None, **attributes):
-        self._normalize_paths(attributes)
-        tag = TagBuilder(tagName=tagName, text=text, selfClose=selfClose, props=props,parent=self.setParent(parent), **attributes)
+        tag = TagBuilder(tagName=tagName, text=text, selfClose=selfClose, props=props,parent=self._setParent(parent), **attributes)
         tag.builder = self
         return tag
 
@@ -38,7 +42,7 @@ SELF_CLOSING_TAGS = [
 ]
 
 NORMAL_TAGS = [
-    "script","iframe","video","audio","a","style",
+    "script","iframe","video","audio","a","style","title",
     "address", "article", "aside", "footer", "header", "h1", "h2", "h3",
     "h4", "h5", "h6", "hgroup", "main", "nav", "section",
     "blockquote", "dd", "div", "dl", "dt", "figcaption", "figure",

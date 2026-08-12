@@ -13,7 +13,7 @@ SPECIAL_TAGS = {
 }
 
 NORMAL_TAGS = [
-    "address", "article", "aside", "footer","script","style",
+    "address", "article", "aside", "footer","script","style","title",
     "h1", "h2", "h3", "h4", "h5", "h6", "hgroup", "main", "nav", "section",
     "blockquote", "dd", "div", "dl", "dt", "figcaption", "figure",
     "li", "menu", "ol", "p", "pre", "ul",
