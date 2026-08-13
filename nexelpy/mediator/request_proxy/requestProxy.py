@@ -13,7 +13,9 @@ class RequestProxy:
             return data
         return data.get(keys[0]) if len(keys) == 1 else [data.get(k) for k in keys]
 
-    
+    async def app(self):
+        return self._get_original_request().app
+
     async def scope(self, *keys):
         return self._pick(self._get_original_request().scope, *keys)
     
