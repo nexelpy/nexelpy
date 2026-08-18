@@ -1,7 +1,7 @@
 
 from .request_proxy.request_object import set_request, reset_request
-from . import _Global_nexelpy_var
-from .show_erorr_in_page import show_errrr
+# from . import _Global_nexelpy_var
+from .show_erorr_in_view import show_error_in_views
 import traceback
 from .reDirect import RedirectException
 
@@ -25,10 +25,10 @@ def wraper_handler(handler):
             lineno = last.lineno
             code = last.line
             
-            _Global_nexelpy_var.erorr.append({"time":now,"e":e})
+            # _Global_nexelpy_var.erorr.append({"time":now,"e":e})
             mainapp = request.scope.get("app")
             if mainapp.devMode:
-                return await show_errrr({"Time":now,"Erorr":e,"Module path":"/root"+filename,"Line number":lineno,"Code":code})
+                return await show_error_in_views({"Time":now,"Erorr":e,"Module path":"/root"+filename,"Line number":lineno,"Code":code},file=mainapp.file)
 
         finally:
             reset_request(token)

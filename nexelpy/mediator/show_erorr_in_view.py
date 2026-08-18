@@ -1,9 +1,8 @@
-from nexelpy.view import pageBuilder
+from ..view.pageBuilder import PageBilder
 
-
-async def show_errrr(errrr):
-    x = pageBuilder.PageBilder()
-    x.STYLE_tag.text = """
+async def show_error_in_views(errrr,file):
+    x = PageBilder(file)
+    x.style(text = """
 body {
     background-color: rgb(20, 20, 20);
     color: white;
@@ -104,7 +103,7 @@ li:nth-child(4) {
 li:nth-child(4)::before {
     color: #ff66ff;
 }
-"""
+""",parent=x.HEAD_tag)
     x.h2("nexelpy erorr")
     with x.ul():
         for i in errrr:

@@ -17,18 +17,14 @@ class PathBuilder:
         return normpath(self._base_url + standard_url)
 
     def _resolve_file_path(self, path: str):
-            if not path.startswith("."):
-                return False
+        is_root_path = path.startswith("/")
+        dots = len(path) - len(path.lstrip("."))
+        standard_path = (path[1:] if is_root_path else "../" * (dots - 1) + path[dots + 1:])
+        resolved_path = (self._project_root if is_root_path else self._current_dir) / standard_path
+        resolved_path = resolved_path.resolve()
+        resolved_path.relative_to(self._project_root)
+        return resolved_path
 
-            dots = len(path) - len(path.lstrip("."))
-            standard_path = "../" * (dots - 1) + path[dots + 1:]
-            resolved_path = (self._current_dir / standard_path).resolve()
-
-            try:
-                resolved_path.relative_to(self._project_root)
-            except ValueError:
-                return False
-            return resolved_path
 
 
     

@@ -4,6 +4,8 @@ from typing import Any, Tuple
 class UrlChecker:
     @staticmethod
     def check(route: Any, prefix: Any) -> Tuple[bool, str]:
+        if route is None:
+            route = ""
 
         prefix = prefix or ""
 
@@ -13,7 +15,7 @@ class UrlChecker:
         if not isinstance(prefix, str):
             return False, "prefix must be a string"
 
-        if not route.startswith("/"):
+        if route and not route.startswith("/"):
             return False, "route must start with '/'"
 
         if prefix:

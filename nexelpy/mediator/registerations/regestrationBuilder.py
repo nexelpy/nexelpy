@@ -54,18 +54,12 @@ class RegistrationBuilder:
 
     def _log_routes(self) -> None:
         count = len(self._registered_routes)
-        console.print(f"[bold][NexelPy Registration][/bold] [green]registered routes: {count}[/green]")
+        # console.print(f"[bold][NexelPy Registration][/bold] [green]registered routes: {count}[/green]")
         
         if count == 0:
             console.print("[yellow]  No routes registered![/yellow]")
             return
 
-        # for idx, item in enumerate(self._registered_routes, 1):
-        #     methods = ", ".join(item.get("method", []))
-        #     path = item.get("path", "")
-        #     handler = item.get("handler", {}).__name__ if item.get("handler") else "unknown"
-        #     module = item.get("module", "unknown")
-        #     console.print(f"  {idx}. [{methods}] {path} -> {handler} ({module})")
 
     def get_routes(self) -> List[Dict]:
         return self._registered_routes

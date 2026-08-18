@@ -25,7 +25,7 @@ class PluginBuilder(FormBuilder,CookiesManager):
         PLUGIN = await plugin
         PARENT.children.extend(PLUGIN.BODY_tag.children)
         self.HEAD_tag.children.extend(PLUGIN.HEAD_tag.children)
-        self._cookies_list.extend(PLUGIN._cookies_list)#------------###########################????????????????????????????????????????????//
+        self._cookies_list.extend(PLUGIN._cookies_list)
         return PLUGIN._plugin_return_func_data[0] if len(PLUGIN._plugin_return_func_data) ==1 else PLUGIN._plugin_return_func_data 
 
     def URLs(self,url):

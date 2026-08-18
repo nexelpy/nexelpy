@@ -86,7 +86,7 @@ def AutoRegister(
             "handler": func,
             "module": module,
             "line": line,
-            "route": route,
+            "route": route or "",
             "prefix": prefix or "",})
         return func
 
