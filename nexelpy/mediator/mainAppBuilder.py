@@ -29,7 +29,7 @@ class UvicornAccessFilter(logging.Filter):
 
 class nexelStaticFiles(StaticFiles):
     async def __call__(self, scope, receive, send):
-        if "/static/" not in scope["path"]:
+        if "/static/" not in scope["path"] and not scope["path"].endswith((".js", ".css",".html")):
             response = PlainTextResponse("Not Found", status_code=404)
             await response(scope, receive, send)
             return 
@@ -59,8 +59,7 @@ class MainAppBuilder(Starlette):
         if Reloader.is_child(): 
             self.AutoRegister_list = RegistrationBuilder(file).run()
             self._registr_root_list()
-        else:
-            self.auto_routes = []
+            
 
         # ceate .nexelpy file for find root in page and plugins
         root_dir = Path(self.file).resolve().parent
@@ -68,8 +67,8 @@ class MainAppBuilder(Starlette):
         if not nexelpy_file.exists():
             nexelpy_file.touch()
 
-        # # mount static move to run method
-        # self.mount("/", nexelStaticFiles(directory=Path(file).resolve().parent), name="static")
+        # mount static 
+        self.mount("/", nexelStaticFiles(directory=Path(file).resolve().parent), name="static")
     #----------------------
 
     def _registr_root_list(self):
@@ -86,13 +85,10 @@ class MainAppBuilder(Starlette):
             reloader = Reloader(entry_file=self.file)
             reloader.run()
         else:
-            # mount static
-            self.mount("/", nexelStaticFiles(directory=Path(self.file).resolve().parent), name="static")
             #log print
             console.print(f"[bold][NexelPy MainApp][/bold] [blue]registered manual routes:[/blue] {len(self.manual_routes)}")
             console.print(f"[bold][NexelPy Registration][/bold] [green]registered routes: {len(self.AutoRegister_list)+ len(self.manual_routes) }[/green]")
             console.print("=" * 80) 
-
             import uvicorn
             logging.getLogger("uvicorn.access").addFilter(UvicornAccessFilter())
             uvicorn.run(self, host=host, port=port)
@@ -117,8 +113,14 @@ class MainAppBuilder(Starlette):
             methods = [method.upper()]
         else:
             methods = [item.upper() for item in method]
-        route_data = {"path": full_path,"method": methods,"handler": func,"module": func.__module__,"file": func.__code__.co_filename,"line": func.__code__.co_firstlineno,
-            "route": route,"prefix": prefix,}
+        route_data = {"path": full_path,"method": methods,"handler": func,"module": func.__module__,"file": func.__code__.co_filename,
+            "line": func.__code__.co_firstlineno,"route": route,"prefix": prefix,}
         self.manual_routes.append(route_data)
         self.add_route(full_path,wraper_handler(func),methods=methods,)
+        # mount static route send to end of the route list
+        for index, route in enumerate(self.routes):
+            if getattr(route, "name", None) == "static":
+                static_route = self.routes.pop(index)
+                self.routes.append(static_route)
+                break
         return func

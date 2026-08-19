@@ -9,7 +9,7 @@ class PathBuilder:
         relative_dir = self._current_dir.relative_to(self._project_root)
         self._base_url = f"/{relative_dir.as_posix()}/"
 
-    def URLs(self, url: str):
+    def url(self, url: str):
         if not url.startswith("."):
             return url
         dots = len(url) - len(url.lstrip("."))

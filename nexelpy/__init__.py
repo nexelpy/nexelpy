@@ -6,6 +6,9 @@ from .view.vapi import Vapi
 # from .view.vintage import Vintage
 from .view.restApi import RestApi
 from .mediator.mainAppBuilder import MainAppBuilder as Nexelpy
+from .nextyle.nextyleBuilder import Nextyle
+
+
 # from .mediator.headerBuilder.headerBuilder import HeaderBuilder as Headers
 # from .mediator.request_proxy.requestProxy import request as REQUEST
 
