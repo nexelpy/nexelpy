@@ -4,21 +4,43 @@ from urllib.parse import urlencode
 from ..mediator.headerBuilder.headerBuilder import HeaderBuilder
 from .pathBuilder import PathBuilder
 from ..mediator.cookiesManager import CookiesManager
+import base64
+import hashlib
 # from .quickEvents.quickEventsBuilder import QuickEvents
 
-class PluginBuilder(FormBuilder,CookiesManager): 
-    def __init__(self,file=None):
+class PluginBuilder(FormBuilder, CookiesManager):
+    def __init__(self, file=None, nextyles=None):
         super().__init__()
         self._plugin_return_func_data = None
         self.Headers = HeaderBuilder()
-        self._PathBuilder = PathBuilder(file_path=file,root=self.REQUEST._get_original_request().app.root_Path)
-        # self.QuickEvents = QuickEvents()
+        self._file = file
+        self._root_path = self.REQUEST._get_original_request().app.root_Path
+        self._PathBuilder = PathBuilder(file_path=file, root=self._root_path)
+        self._scope_token = self._make_scope_token()
 
-        #DOM
         self.element("!DOCTYPE html", selfClose=True, parent=self.elementsContainer)
         self.HTML_tag = self.element("html", parent=self.elementsContainer)
         self.HEAD_tag = self.element("head", parent=self.HTML_tag)
         self.BODY_tag = self.element("body", parent=self.HTML_tag)
+        self._add_nextyle_links(nextyles)
+
+
+
+    def _add_nextyle_links(self, nextyles):
+        if nextyles is None:
+            return
+        nextyle_items = (nextyles if isinstance(nextyles, (list, tuple)) else [nextyles])
+        for nextyle in nextyle_items:
+            self.element("link",parent=self.HEAD_tag,rel="stylesheet",href=nextyle.href,selfClose=True,)
+
+    def scoping(self, text="", props="", parent=None, **attributes):
+        attributes["data-scoping"] = self._scope_token
+        return self.element(tagName="div", text=text, props=props, parent=parent, **attributes)
+
+    def _make_scope_token(self) -> str:
+        digest = hashlib.blake2s(str(self._file).encode("utf-8"), digest_size=4).digest()
+        return base64.b32encode(digest).decode("ascii").lower().rstrip("=")[:5]
+
 
     async def importPlugin(self, plugin, parent=None):
         PARENT = self._setParent(parent)

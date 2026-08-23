@@ -35,6 +35,7 @@ class Nextyle:
         self.root_context = CSSContext(parent=self, context_type="root")
         self.context_stack = [self.root_context]
         self.url_resolver = URLResolver(current_dir=self.current_dir, project_root=self.project_root)
+        self.href = "/" + self.export_file.relative_to(self.project_root).as_posix()
         self.renderer = CSSRenderer(self)
 
     def _find_project_root(self, start_file: Path) -> Path:
@@ -62,7 +63,7 @@ class Nextyle:
         return base64.b32encode(digest).decode("ascii").lower().rstrip("=")[:5]
 
     def _get_active_scope_selector(self) -> str:
-        selectors = [context.value.strip() for context in self.context_stack if context.context_type in {"scope-for", "scope-for-auto"} and context.value.strip()]
+        selectors = [context.value.strip() for context in self.context_stack if context.context_type in {"nexel-scoping", "nexel-scoping-auto"} and context.value.strip()]
         return " ".join(selectors)
 
     def url(self, path: str, format: Optional[str] = None) -> str:
@@ -89,8 +90,11 @@ class Nextyle:
     def font_face(self, family_name: str) -> FontFaceContextManager:
         return FontFaceContextManager(self, family_name)
 
-    def keyframes(self, name: str) -> ContextManager:
-        return ContextManager(self, "keyframes", name)
+    def keyframes(self, name: str, scope: bool = True) -> ContextManager:
+        return ContextManager(self, "keyframes", self._make_keyframe_name(name, scope))
+
+    def _make_keyframe_name(self, name: str, scope: bool = True) -> str:
+        return f"{name}--{self.scope_token}" if scope else name
 
     def property(self, name: str) -> ContextManager:
         return ContextManager(self, "property", name)
@@ -102,9 +106,9 @@ class Nextyle:
         value = f"({root_selector})" if to is None else f"({root_selector}) to ({to})"
         return ContextManager(self, "scope", value)
 
-    def scope_for(self, selector: Optional[str] = None) -> ContextManager:
-        context_type = "scope-for-auto" if selector is None else "scope-for"
-        selector = f'[data-nxls="{self.scope_token}"]' if selector is None else selector
+    def scoping(self, selector: Optional[str] = None) -> ContextManager:
+        context_type = "nexel-scoping-auto" if selector is None else "nexel-scoping"
+        selector = f'[data-scoping="{self.scope_token}"]' if selector is None else selector
         return ContextManager(self, context_type, selector)
 
     def starting_style(self) -> ContextManager:
@@ -117,13 +121,7 @@ class Nextyle:
         self.current_context.declarations["src"] = ", ".join(str(source) for source in sources)
         return self
 
-    def from_(self) -> KeyframeStep:
-        return KeyframeStep(self.current_context, "from")
-
-    def to(self) -> KeyframeStep:
-        return KeyframeStep(self.current_context, "to")
-
-    def at(self, value: Any) -> KeyframeStep:
+    def step(self, value: Any) -> KeyframeStep:
         return KeyframeStep(self.current_context, value)
 
     def add_var(self, **variables: Any) -> "Nextyle":

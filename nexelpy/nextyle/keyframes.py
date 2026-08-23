@@ -1,33 +1,37 @@
 from __future__ import annotations
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 
 class KeyframeStep:
-    def __init__(self,context,step_name: Any,):
+    def __init__(self, context, step_name: Any):
         self.context = context
         self.step_name = str(step_name)
 
-    def _add_prop(self,css_prop: str,value: Optional[Any] = None,**kwargs,):
+    def _add_prop(self, css_prop: str, value: Optional[Any] = None, **kwargs):
         if value is not None:
-            self.context.keyframe_rules.setdefault(self.step_name,{},)[css_prop] = str(value)
+            self.context.keyframe_rules.setdefault("base", {}).setdefault(self.step_name, {})[css_prop] = str(value)
+        for query_name, query_value in kwargs.items():
+            if query_value is not None:
+                self.context.keyframe_rules.setdefault(query_name, {}).setdefault(self.step_name, {})[css_prop] = str(query_value)
         return self
 
     @staticmethod
     def _make_css_method(css_property_name: str):
-        def method(self: "KeyframeStep",value: Optional[Any] = None,**kwargs,):
-            return self._add_prop(css_property_name,value,**kwargs,)
+        def method(self: "KeyframeStep", value: Optional[Any] = None, **kwargs):
+            return self._add_prop(css_property_name, value, **kwargs)
         method.__name__ = css_property_name.replace("-", "_")
-        method.__doc__ = (f"Set keyframe CSS '{css_property_name}' property.")
+        method.__doc__ = f"Set keyframe CSS '{css_property_name}' property."
         return method
 
     def __getattr__(self, name: str):
         css_property_name = name.replace("_", "-")
-        def dynamic_method(value: Any = None):
-            return self._add_prop(css_property_name,value,)
+        def dynamic_method(value: Optional[Any] = None, **kwargs):
+            return self._add_prop(css_property_name, value, **kwargs)
         return dynamic_method
 
-#-----------------------------------------------------------------------------------------------------
+
 from .cssProperty import css_Property as CSS_PROPERTIES
+
 for css_property in CSS_PROPERTIES:
     method_name = css_property.replace("-", "_")
-    setattr(KeyframeStep,method_name,KeyframeStep._make_css_method(css_property),)
+    setattr(KeyframeStep, method_name, KeyframeStep._make_css_method(css_property))

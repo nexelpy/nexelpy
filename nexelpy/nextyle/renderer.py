@@ -17,6 +17,13 @@ class CSSRenderer:
         prefix = "    " * level
         return "\n".join(f"{prefix}{prop}: {value};" for prop, value in declarations.items())
 
+    @staticmethod
+    def merge_keyframe_rules(current_rules, overrides):
+        merged = {step_name: declarations.copy() for step_name, declarations in current_rules.items()}
+        for step_name, declarations in overrides.items():
+            merged.setdefault(step_name, {}).update(declarations)
+        return merged
+
     def render_context_actions(self, context, group_name: str = "base") -> List[str]:
         blocks = []
         for action in context.actions:
@@ -47,9 +54,9 @@ class CSSRenderer:
             blocks.append(f"{media_rule} {{\n{self.indent_css(inner_css)}\n}}")
         return "\n\n".join(blocks)
 
-    def render_keyframes(self, context) -> str:
+    def render_keyframe_definition(self, name: str, rules) -> str:
         blocks = []
-        for step_name, declarations in context.keyframe_rules.items():
+        for step_name, declarations in rules.items():
             lines = [f"{step_name} {{"]
             for prop, value in declarations.items():
                 lines.append(f"    {prop}: {value};")
@@ -57,9 +64,25 @@ class CSSRenderer:
             blocks.append("\n".join(lines))
         if not blocks:
             return ""
-        inner_css = "\n\n".join(blocks)
-        return f"@keyframes {context.value} {{\n{self.indent_css(inner_css)}\n}}"
+        content = "\n\n".join(blocks)
+        return f"@keyframes {name} {{\n{self.indent_css(content)}\n}}"
 
+    def render_keyframes(self, context) -> str:
+        rules_by_query = context.keyframe_rules
+        blocks = []
+        effective_rules = self.merge_keyframe_rules({}, rules_by_query.get("base", {}))
+        base_css = self.render_keyframe_definition(context.value, effective_rules)
+        if base_css:
+            blocks.append(base_css)
+        for media_key, media_rule in self.nextyle.media_queries.items():
+            overrides = rules_by_query.get(media_key, {})
+            effective_rules = self.merge_keyframe_rules(effective_rules, overrides)
+            if not overrides:
+                continue
+            keyframe_css = self.render_keyframe_definition(context.value, effective_rules)
+            if keyframe_css:
+                blocks.append(f"{media_rule} {{\n{self.indent_css(keyframe_css)}\n}}")
+        return "\n\n".join(blocks)
 
     def render_declaration_context(self, context, header: str) -> str:
         if not context.declarations:
@@ -70,7 +93,7 @@ class CSSRenderer:
     def render_context(self, context) -> str:
         context_type = context.context_type
 
-        if context_type in {"scope-for", "scope-for-auto"}:
+        if context_type in {"nexel-scoping", "nexel-scoping-auto"}:
             return self.render_media_aware_context(context)
 
         if context_type == "root":
