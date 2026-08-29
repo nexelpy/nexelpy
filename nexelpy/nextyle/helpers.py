@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any
+from typing import Any 
 
 
 def python_to_css_name(name: str) -> str:

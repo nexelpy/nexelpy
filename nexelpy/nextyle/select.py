@@ -7,9 +7,7 @@ from .helpers import python_to_css_name
 if TYPE_CHECKING:
     from .nextyleBuilder import Nextyle
 
-
 RuleKey = Tuple[str, str]
-
 
 class Select:
     def __init__(self, selector_name: str, parent_nextyle: "Nextyle", pseudo_suffix: str = "", rules: Optional[Dict[RuleKey, Dict[str, str]]] = None, scope_selector: str = ""):
@@ -36,10 +34,8 @@ class Select:
 
     def __getattr__(self, name: str):
         css_property_name = python_to_css_name(name)
-
         def dynamic_method(value: Optional[Any] = None, **kwargs) -> "Select":
             return self._add_prop(css_property_name, value, **kwargs)
-
         return dynamic_method
 
     def pseudo(self, pseudo_name: str) -> "Select":
@@ -103,7 +99,13 @@ class Select:
 
     def _render_selector(self, pseudo_suffix: str) -> str:
         selector = self.selector_name.strip()
-        return f"{selector}{pseudo_suffix}" if not self.scope_selector else f"{self.scope_selector} {selector}{pseudo_suffix}"
+        if not self.scope_selector:
+            return f"{selector}{pseudo_suffix}"
+        if selector in ("&", ":self", ""):
+            return f"{self.scope_selector}{pseudo_suffix}"
+        if selector.startswith("&"):
+            return f"{self.scope_selector}{selector[1:]}{pseudo_suffix}"
+        return f"{self.scope_selector} {selector}{pseudo_suffix}"
 
     def render_group(self, group_name: str) -> Optional[str]:
         blocks = []
@@ -117,7 +119,6 @@ class Select:
             blocks.append("\n".join(lines))
         return "\n\n".join(blocks) if blocks else None
 
-#---------------------------------------------------------
 from .cssProperty import css_Property as CSS_PROPERTIES
 for css_property in CSS_PROPERTIES:
     setattr(Select, css_property.replace("-", "_"), Select._make_css_method(css_property))

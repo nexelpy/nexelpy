@@ -3,7 +3,7 @@ from starlette.responses import HTMLResponse
 from .headTagAnalyzer import HeadTagAnalyzer
 
 class PageBilder(PluginBuilder):
-    def __init__(self,file=None,title="Nexelpy",favicon_path="/nexelVenv",favicon_type="image/png",nextyles=None,):
+    def __init__(self,file=None,title="Nexelpy",favicon_path="/nexel-venv/static/img/nexel-logo.png",favicon_type="image/png",nextyles=None,):
         super().__init__(file=file,nextyles=None,)
 
         self.element("meta",parent=self.HEAD_tag,charset="UTF-8",selfClose=True,)

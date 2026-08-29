@@ -5,7 +5,6 @@ class ElementBuilder():
         super().__init__()
         self._parent_stack = []
         self.elementsContainer = TagBuilder(tagName="elementsContainer")
-        # self.elementsContainer.builder = self
 
     def _setParent(self, parent=None):
         if parent is not None:
@@ -22,8 +21,6 @@ class ElementBuilder():
         tag = TagBuilder(tagName=tagName, text=text, selfClose=selfClose, props=props,parent=self._setParent(parent), **attributes)
         tag.builder = self
         return tag
-
-
 
 #--------------------------------------------------------------------------------------
 def _make_tag_method(tag_name, self_close=False):

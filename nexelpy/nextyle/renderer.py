@@ -27,6 +27,9 @@ class CSSRenderer:
     def render_context_actions(self, context, group_name: str = "base") -> List[str]:
         blocks = []
         for action in context.actions:
+            if isinstance(action, str) and group_name == "base":
+                blocks.append(action)
+                continue
             if hasattr(action, "render_group"):
                 rendered = action.render_group(group_name)
                 if rendered:
@@ -40,6 +43,7 @@ class CSSRenderer:
                 if rendered:
                     blocks.append(rendered)
         return blocks
+
 
     def render_media_aware_context(self, context) -> str:
         blocks = []
@@ -65,7 +69,7 @@ class CSSRenderer:
         if not blocks:
             return ""
         content = "\n\n".join(blocks)
-        return f"@keyframes {name} {{\n{self.indent_css(content)}\n}}"
+        return f"@keyframes {name} {{\n{self.indent_css(content)}\n}}" 
 
     def render_keyframes(self, context) -> str:
         rules_by_query = context.keyframe_rules

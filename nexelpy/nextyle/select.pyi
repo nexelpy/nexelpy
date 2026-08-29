@@ -1,7 +1,7 @@
 from typing import Any, Dict, Optional, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .nextyle import Nextyle
+    from .nextyleBuilder import Nextyle
 
 
 RuleKey = Tuple[str, str]

@@ -1,8 +1,9 @@
 from __future__ import annotations
 from typing import Any, Optional
+from .helpers import python_to_css_name
 
 
-class KeyframeStep:
+class KeyframeStep: 
     def __init__(self, context, step_name: Any):
         self.context = context
         self.step_name = str(step_name)
@@ -19,17 +20,17 @@ class KeyframeStep:
     def _make_css_method(css_property_name: str):
         def method(self: "KeyframeStep", value: Optional[Any] = None, **kwargs):
             return self._add_prop(css_property_name, value, **kwargs)
-        method.__name__ = css_property_name.replace("-", "_")
+        method.__name__ = css_property_name.replace("_", "-")
         method.__doc__ = f"Set keyframe CSS '{css_property_name}' property."
         return method
 
     def __getattr__(self, name: str):
-        css_property_name = name.replace("_", "-")
-        def dynamic_method(value: Optional[Any] = None, **kwargs):
+        css_property_name = python_to_css_name(name)
+        def dynamic_method(value: Optional[Any] = None, **kwargs: Any):
             return self._add_prop(css_property_name, value, **kwargs)
         return dynamic_method
 
-
+#----------------------------------------------------------------------------
 from .cssProperty import css_Property as CSS_PROPERTIES
 
 for css_property in CSS_PROPERTIES:
