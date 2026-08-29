@@ -15,6 +15,7 @@ from .session_proxy.session_middleware import SessionManager
 import shutil
 from typing import Any,Callable,Iterable
 from .registerations.url_checker import UrlChecker
+from .nodExtractor import NodeExtractor
 
 console = Console()
 
@@ -40,6 +41,7 @@ class nexelStaticFiles(StaticFiles):
 class MainAppBuilder(Starlette):
     def __init__(self, file=__file__, devMode=True,secretKey=None):
         super().__init__(exception_handlers={ RedirectException: redirect_exception_handler })
+        NodeExtractor().extract_if_needed()
         self.file = file
         self.root_Path = os.path.dirname(os.path.abspath(file))
         self.devMode = devMode
