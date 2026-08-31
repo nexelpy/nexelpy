@@ -1,16 +1,16 @@
+import inspect
 import os
-import tempfile
-from inspect import cleandoc
+import re
+import subprocess
 from pathlib import Path
-from subprocess import PIPE, run
+from ..sharedClasses.nextyle_nexcript_path_control import NexetyleNexcriptPathControl
+from .code_transformer import CodeTransformer
 
-
-class Nexcript:
-    def __init__(self, file: str, export_path: str = None):
-        self.code_list = []
-        self.file_path = Path(file).resolve()
-        self.export_file = (self.file_path.parent / export_path).resolve() if export_path else self.file_path.with_suffix(".js")
-        self.root_dir = Path(__file__).resolve().parent.parent
+class Nexcript(NexetyleNexcriptPathControl):
+    def __init__(self, file: str | Path, export_path: str | Path | None = None):
+        super().__init__(file)
+        self.export_file = self._resolve_export_path(export_path)
+        self.code_list: list[dict[str, str]] = []
         self.node_exe = self._resolve_node_binary()
         self.rapydscript = self._resolve_rapydscript()
 
@@ -22,56 +22,47 @@ class Nexcript:
             self.export()
         return False
 
-    def _resolve_node_binary(self) -> str:
-        candidates = list(self.root_dir.glob("nodjs/**/bin/node"))
-        return str(candidates[0]) if candidates else "node"
-
-    def _resolve_rapydscript(self) -> str:
-        candidates = list(self.root_dir.glob("nodjs/**/lib/node_modules/rapydscript-ng/bin/rapydscript"))
-        return str(candidates[0]) if candidates else "rapydscript"
-
     def js(self, code: str):
-        self.code_list.append({"js": cleandoc(code)})
+        self.code_list.append({"lang": "js", "code": inspect.cleandoc(code)})
         return self
 
     def ts(self, code: str):
-        self.code_list.append({"ts": cleandoc(code)})
+        self.code_list.append({"lang": "ts", "code": inspect.cleandoc(code)})
         return self
 
-    # def py(self, code: str):
-    #     self.code_list.append({"py": cleandoc(code)})
-    #     return self
+    def _resolve_export_path(self, export_path: str | Path | None) -> Path:
+        if export_path is None:
+            return (self.current_dir / f"{self.file_path.stem}.js").resolve()
+        return self._resolve_file_path(export_path)
+
+    def _resolve_node_binary(self) -> str:
+        pattern = "nodjs/**/node.exe" if os.name == "nt" else "nodjs/**/bin/node"
+        candidates = sorted(self.project_root.glob(pattern))
+        return str(candidates[0]) if candidates else "node"
+
+    def _resolve_rapydscript(self) -> str:
+        pattern = "nodjs/**/rapydscript.cmd" if os.name == "nt" else "nodjs/**/lib/node_modules/rapydscript-ng/bin/rapydscript"
+        candidates = sorted(self.project_root.glob(pattern))
+        return str(candidates[0]) if candidates else "rapydscript"
 
     def _transpile_ts(self, ts_code: str) -> str:
-        js_script = "const fs=require('fs');const input=fs.readFileSync(0,'utf-8');const stripped=input.replace(/:\\s*\\b(string|number|boolean|any|void|unknown|never|object)\\b/g,'').replace(/interface\\s+[A-Za-z0-9_]+\\s*\\{[^}]*\\}/g,'').replace(/type\\s+[A-Za-z0-9_]+\\s*=[^;]+;/g,'');process.stdout.write(stripped);"
-        proc = run([self.node_exe, "--experimental-strip-types", "-e", "const fs=require('fs');const Module=require('node:module');const input=fs.readFileSync(0,'utf-8');process.stdout.write(Module.stripTypeScriptTypes(input));"], input=ts_code, stdout=PIPE, stderr=PIPE, text=True)
-        if proc.returncode != 0:
-            fallback = run([self.node_exe, "-e", js_script], input=ts_code, stdout=PIPE, stderr=PIPE, text=True)
-            return fallback.stdout.strip()
-        return proc.stdout.strip()
+        try:
+            proc = subprocess.run([self.node_exe, "--experimental-strip-types", "-e", f"console.log(require('module').stripTypeScriptTypes({ts_code!r}))"], capture_output=True, text=True, check=True)
+            return proc.stdout.strip()
+        except Exception:
+            return re.sub(r":\s*(string|number|boolean|any)(\[\])?", "", ts_code)
 
-    # def _transpile_py(self, py_code: str) -> str:
-    #     with tempfile.NamedTemporaryFile(mode="w", suffix=".rs", delete=False, encoding="utf-8") as f:
-    #         f.write(py_code)
-    #         temp_path = f.name
-    #     try:
-    #         cmd = [self.node_exe, self.rapydscript, "-m", "-b", temp_path]
-    #         result = run(cmd, stdout=PIPE, stderr=PIPE, text=True)
-    #         if result.returncode != 0:
-    #             return f"/* RapydScript Error: {result.stderr.strip()} */"
-    #         return result.stdout.strip()
-    #     finally:
-    #         if os.path.exists(temp_path):
-    #             os.unlink(temp_path)
+    def render(self) -> str:
+        processed_blocks = []
+        for item in self.code_list:
+            raw_code = item["code"]
+            if item["lang"] == "ts":
+                raw_code = self._transpile_ts(raw_code)
+            transformer = CodeTransformer(code=raw_code, path_control=self, scope_token=self.scoping_token)
+            processed_blocks.append(transformer.transform())
+        return "\n\n".join(processed_blocks)
 
     def export(self):
-        output_parts = []
-        for item in self.code_list:
-            if "js" in item:
-                output_parts.append(item["js"])
-            elif "ts" in item:
-                output_parts.append(self._transpile_ts(item["ts"]))
-            # elif "py" in item:
-            #     output_parts.append(self._transpile_py(item["py"]))
-        self.export_file.write_text("\n\n".join(output_parts), encoding="utf-8")
-        return self
+        output_content = self.render()
+        self.export_file.parent.mkdir(parents=True, exist_ok=True)
+        self.export_file.write_text(output_content, encoding="utf-8")

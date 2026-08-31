@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
+from .cssProperty import css_Property as CSS_PROPERTIES
 from .helpers import python_to_css_name
 
 if TYPE_CHECKING:
@@ -32,6 +33,13 @@ class Select:
         method.__name__ = css_property_name.replace("-", "_")
         return method
 
+    @staticmethod
+    def _make_pseudo_method(pseudo_target: str):
+        def method(self: "Select") -> "Select":
+            return self.pseudo(pseudo_target)
+        method.__name__ = pseudo_target.lstrip(":").replace("-", "_")
+        return method
+
     def __getattr__(self, name: str):
         css_property_name = python_to_css_name(name)
         def dynamic_method(value: Optional[Any] = None, **kwargs) -> "Select":
@@ -40,62 +48,8 @@ class Select:
 
     def pseudo(self, pseudo_name: str) -> "Select":
         pseudo_name = pseudo_name.strip()
-        pseudo_name = pseudo_name if pseudo_name.startswith(":") else f":{pseudo_name}"
+        pseudo_name = pseudo_name if pseudo_name.startswith(":") else f":{pseudo_name.replace('_', '-')}"
         return Select(selector_name=self.selector_name, parent_nextyle=self.parent, pseudo_suffix=f"{self.pseudo_suffix}{pseudo_name}", rules=self.rules, scope_selector=self.scope_selector)
-
-    def hover(self) -> "Select":
-        return self.pseudo("hover")
-
-    def focus(self) -> "Select":
-        return self.pseudo("focus")
-
-    def focus_visible(self) -> "Select":
-        return self.pseudo("focus-visible")
-
-    def focus_within(self) -> "Select":
-        return self.pseudo("focus-within")
-
-    def active(self) -> "Select":
-        return self.pseudo("active")
-
-    def disabled(self) -> "Select":
-        return self.pseudo("disabled")
-
-    def enabled(self) -> "Select":
-        return self.pseudo("enabled")
-
-    def checked(self) -> "Select":
-        return self.pseudo("checked")
-
-    def visited(self) -> "Select":
-        return self.pseudo("visited")
-
-    def first_child(self) -> "Select":
-        return self.pseudo("first-child")
-
-    def last_child(self) -> "Select":
-        return self.pseudo("last-child")
-
-    def first_of_type(self) -> "Select":
-        return self.pseudo("first-of-type")
-
-    def last_of_type(self) -> "Select":
-        return self.pseudo("last-of-type")
-
-    def before(self) -> "Select":
-        return self.pseudo("::before")
-
-    def after(self) -> "Select":
-        return self.pseudo("::after")
-
-    def placeholder(self) -> "Select":
-        return self.pseudo("::placeholder")
-
-    def selection(self) -> "Select":
-        return self.pseudo("::selection")
-
-    def marker(self) -> "Select":
-        return self.pseudo("::marker")
 
     def _render_selector(self, pseudo_suffix: str) -> str:
         selector = self.selector_name.strip()
@@ -119,6 +73,16 @@ class Select:
             blocks.append("\n".join(lines))
         return "\n\n".join(blocks) if blocks else None
 
-from .cssProperty import css_Property as CSS_PROPERTIES
+#--------------------------------------------------------------------------------------------------------
+
 for css_property in CSS_PROPERTIES:
     setattr(Select, css_property.replace("-", "_"), Select._make_css_method(css_property))
+
+#--------------------------------------------------------------------------------------------------------
+
+PSEUDO_ELEMENTS_AND_CLASSES = ["hover","focus","focus_visible","focus_within","active","disabled","enabled","checked",
+    "visited","first_child","last_child","first_of_type","last_of_type","::before","::after","::placeholder","::selection","::marker",]
+
+for pseudo_item in PSEUDO_ELEMENTS_AND_CLASSES:
+    method_name = pseudo_item.lstrip(":").replace("-", "_")
+    setattr(Select, method_name, Select._make_pseudo_method(pseudo_item))

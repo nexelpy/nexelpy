@@ -1,0 +1,40 @@
+{
+  "name": "nexelpy-vscode",
+  "displayName": "NexelPy Tools",
+  "description": "Smart CSS/JS Autocomplete, Validation and Highlighting for Nextyle and Nexcript in Python",
+  "version": "0.2.0",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Snippets"
+  ],
+  "activationEvents": [
+    "onLanguage:python"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "configurationDefaults": {
+      "[python]": {
+        "editor.quickSuggestions": {
+          "other": true,
+          "comments": false,
+          "strings": true
+        },
+        "editor.suggest.snippetsPreventQuickSuggestions": false
+      }
+    },
+    "grammars": [
+      {
+        "scopeName": "inline.nexelpy",
+        "path": "./syntaxes/nexelpy-injection.json",
+        "injectTo": [
+          "source.python"
+        ]
+      }
+    ]
+  }
+}
+

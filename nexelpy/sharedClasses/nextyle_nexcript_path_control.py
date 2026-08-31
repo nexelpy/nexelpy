@@ -33,26 +33,19 @@ class NexetyleNexcriptPathControl:
     def _url(self, value: str) -> str:
         if not value.startswith("."):
             return value
-
         dots_count = len(value) - len(value.lstrip("."))
         target_suffix = value[dots_count:].lstrip("/")
         current_step = self.current_dir
-        overflow_dots = 0
-
         for _ in range(dots_count - 1):
-            if current_step == self.project_root:
-                overflow_dots += 1
-            else:
+            if current_step != self.project_root:
                 current_step = current_step.parent
-
         rel_path = current_step.relative_to(self.project_root).as_posix()
         resolved_part = "" if rel_path == "." else f"/{rel_path}"
         suffix_part = f"/{target_suffix}" if target_suffix else ""
+        result = f"{resolved_part}{suffix_part}"
+        return result if result else "/"
 
-        if overflow_dots > 0:
-            return f"{'.' * overflow_dots}{resolved_part}{suffix_part}"
 
-        return f"{resolved_part}{suffix_part}"
 
     def _resolve_file_path(self, value: str | Path) -> Path:
         value = str(value).replace("\\", "/")

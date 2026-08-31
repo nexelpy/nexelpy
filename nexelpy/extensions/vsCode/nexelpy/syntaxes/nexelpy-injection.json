@@ -1,0 +1,40 @@
+{
+  "scopeName": "inline.nexelpy",
+  "injectionSelector": "L:source.python",
+  "patterns": [
+    {
+      "comment": "Nextyle Raw CSS",
+      "begin": "(\\b(?:add_raw_css|raw_css|css)\\s*\\()\\s*(\"\"\"|''')",
+      "beginCaptures": {
+        "1": { "name": "meta.function-call.python" },
+        "2": { "name": "punctuation.definition.string.begin.python" }
+      },
+      "end": "\\2",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.string.end.python" }
+      },
+      "patterns": [
+        {
+          "include": "source.css"
+        }
+      ]
+    },
+    {
+      "comment": "Nexcript JavaScript/TypeScript",
+      "begin": "(\\b(?:js|ts)\\s*\\()\\s*(\"\"\"|''')",
+      "beginCaptures": {
+        "1": { "name": "meta.function-call.python" },
+        "2": { "name": "punctuation.definition.string.begin.python" }
+      },
+      "end": "\\2",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.string.end.python" }
+      },
+      "patterns": [
+        {
+          "include": "source.js"
+        }
+      ]
+    }
+  ]
+}
