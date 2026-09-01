@@ -2,9 +2,9 @@ from .nextyleBuilder import Nextyle
 
 
 with Nextyle(__file__,layer_order=("reset", "base", "components", "utilities"),costom_size="@media(min-width: 2400x)") as y:
-    # y instance need import to anoter module or pass to (View(nextyles=y),Plugin(nextyles=y)) for generate else isnt generate
+    # y instance need import to anoter module or pass to (View(nextyles=[y]),Plugin(nextyles=[y])) for generate else isnt generate
 
-    y.import_file( y.url("./static/fonts.css") )
+    y.import_css( y.url("./static/fonts.css") )
 
     y.select(".btn").background_color("red").color("white").padding("20px")\
         .hover().background_color("yellow").color("black").padding("25px")\
@@ -43,3 +43,10 @@ with Nextyle(__file__,layer_order=("reset", "base", "components", "utilities"),c
 
     with y.scoping("[data-scoping='my-scop']"):
          y.select(".manuel-scop").background_color("black").color("white").background_image( y.url("./static/page-bg.png") )
+
+
+    y.raw_css("""
+    body{
+        color:red;
+    }
+    """)

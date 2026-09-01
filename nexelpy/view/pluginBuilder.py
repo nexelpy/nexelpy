@@ -9,7 +9,7 @@ import hashlib
 # from .quickEvents.quickEventsBuilder import QuickEvents
 
 class PluginBuilder(FormBuilder, CookiesManager):
-    def __init__(self, file=None, nextyles=None):
+    def __init__(self, file=None, nextyles=None,nexcripts=None):
         super().__init__()
         self._plugin_return_func_data = None
         self.Headers = HeaderBuilder()
@@ -22,16 +22,20 @@ class PluginBuilder(FormBuilder, CookiesManager):
         self.HTML_tag = self.element("html", parent=self.elementsContainer)
         self.HEAD_tag = self.element("head", parent=self.HTML_tag)
         self.BODY_tag = self.element("body", parent=self.HTML_tag)
-        self._add_nextyle_links(nextyles)
+       
 
 
+    # def _add_nextyle_link(self, nextyle, default_parent=None):
+    #     if nextyle is not None:
+    #         attrs = getattr(nextyle, "_tag_attrs", {}).copy()
+    #         parent = attrs.pop("parent", default_parent or self.HEAD_tag)
+    #         self.element("link", parent=parent, rel="stylesheet", href=nextyle.href, selfClose=True, **attrs)
 
-    def _add_nextyle_links(self, nextyles):
-        if nextyles is None:
-            return
-        nextyle_items = (nextyles if isinstance(nextyles, (list, tuple)) else [nextyles])
-        for nextyle in nextyle_items:
-            self.element("link",parent=self.HEAD_tag,rel="stylesheet",href=nextyle.href,selfClose=True,)
+    # def _add_nexcript_script(self, nexcript, default_parent=None):
+    #     if nexcript is not None:
+    #         attrs = getattr(nexcript, "_tag_attrs", {}).copy()
+    #         parent = attrs.pop("parent", default_parent or self.HEAD_tag)
+    #         self.element("script", parent=parent, src=nexcript.src, **attrs)
 
     def scoping(self, text="", props="", parent=None, **attributes):
         attributes["data-scoping"] = self._scope_token

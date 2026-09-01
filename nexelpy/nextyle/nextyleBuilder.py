@@ -34,6 +34,7 @@ class Nextyle(NexetyleNexcriptPathControl):
         self.context_stack = [self.root_context]
         self.href = "/" + self.export_file.relative_to(self.project_root).as_posix()
         self.renderer = CSSRenderer(self)
+        self._tag_attrs = {}
 
     @property
     def current_context(self) -> CSSContext:
@@ -121,10 +122,13 @@ class Nextyle(NexetyleNexcriptPathControl):
     def step(self, value: Any) -> KeyframeStep:
         return KeyframeStep(self.current_context, value)
 
-    def import_file(self, target: str) -> "Nextyle":
+    def import_css(self, target: str) -> "Nextyle":
         self.current_context.actions.append(f"@import {target};")
         return self
 
+    def attr(self, **kwargs) -> "Nextyle":
+        self._tag_attrs.update(kwargs)
+        return self
 
     def add_var(self, **variables: Any) -> "Nextyle":
         for name, value in variables.items():
@@ -143,7 +147,7 @@ class Nextyle(NexetyleNexcriptPathControl):
 
         return context_declaration
 
-    def add_raw_css(self, raw_css: Optional[str] = None, **kwargs: str) -> "Nextyle":
+    def raw_css(self, raw_css: Optional[str] = None, **kwargs: str) -> "Nextyle":
         if raw_css is not None:
             resolved = self._resolve_raw_urls(raw_css.strip())
             self.current_context.actions.append(("raw", "base", resolved))
@@ -159,8 +163,6 @@ class Nextyle(NexetyleNexcriptPathControl):
 
     def generate_css(self) -> str:
         return self.renderer.generate()
-
-
 
     def export(self) -> None:
         css_content = self.generate_css()

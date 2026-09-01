@@ -20,7 +20,7 @@ class CodeTransformer:
             code,
             lambda segment: re.sub(
                 pattern,
-                lambda m: f"document.querySelector('[data-scop=\"{self.scope_token}\"]')" if not m.group(1) else f"document.querySelector('{m.group(1).strip()}')",
+                lambda m: f"document.querySelector('[data-scoping=\"{self.scope_token}\"]')" if not m.group(1) else f"document.querySelector('{m.group(1).strip()}')",
                 segment,
             ),
         )

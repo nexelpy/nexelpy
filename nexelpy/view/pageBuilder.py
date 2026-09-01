@@ -3,7 +3,7 @@ from starlette.responses import HTMLResponse
 from .headTagAnalyzer import HeadTagAnalyzer
 
 class PageBilder(PluginBuilder):
-    def __init__(self,file=None,title="Nexelpy",favicon_path="/nexel-venv/static/img/nexel-logo.png",favicon_type="image/png",nextyles=None,):
+    def __init__(self,file=None,title="Nexelpy",favicon_path="/nexel_venv/static/img/nexel-logo.png",favicon_type="image/png",nextyles=None,):
         super().__init__(file=file,nextyles=None,)
 
         self.element("meta",parent=self.HEAD_tag,charset="UTF-8",selfClose=True,)
@@ -11,7 +11,7 @@ class PageBilder(PluginBuilder):
         self.element("title",parent=self.HEAD_tag,text=title,)
         self.element("link",parent=self.HEAD_tag,rel="icon",href=favicon_path,type=favicon_type,selfClose=True,)
 
-        self._add_nextyle_links(nextyles)
+        # self._add_nextyle_links(nextyles)
 
     def RESPONSE(self):
         HeadTagAnalyzer(self.HEAD_tag).analyze()

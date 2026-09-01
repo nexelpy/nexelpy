@@ -13,6 +13,9 @@ class Nexcript(NexetyleNexcriptPathControl):
         self.code_list: list[dict[str, str]] = []
         self.node_exe = self._resolve_node_binary()
         self.rapydscript = self._resolve_rapydscript()
+        self.src = f"/{self.export_file.relative_to(self.project_root).as_posix()}"
+
+
 
     def __enter__(self):
         return self
