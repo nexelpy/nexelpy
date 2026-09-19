@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from nextyle.cssProperty import css_Property
+from .cssProperty import css_Property
 
 
 PSEUDO_ITEMS = [

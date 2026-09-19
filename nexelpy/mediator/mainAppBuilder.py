@@ -39,7 +39,7 @@ class nexelStaticFiles(StaticFiles):
 
 
 class MainAppBuilder(Starlette):
-    def __init__(self, file=__file__, devMode=True,secretKey=None):
+    def __init__(self, file=__file__, devMode=True,mountStatics=True,secretKey=None):
         super().__init__(exception_handlers={ RedirectException: redirect_exception_handler })
         NodeExtractor().extract_if_needed()
         self.file = file
@@ -70,7 +70,8 @@ class MainAppBuilder(Starlette):
             nexelpy_file.touch()
 
         # mount static 
-        self.mount("/", nexelStaticFiles(directory=Path(file).resolve().parent), name="static")
+        if mountStatics:
+            self.mount("/", nexelStaticFiles(directory=Path(file).resolve().parent), name="static")
     #----------------------
 
     def _registr_root_list(self):

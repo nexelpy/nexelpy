@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from nextyle.cssProperty import css_Property
+from criptyle.nextyle.cssProperty import css_Property
 
 
 HEADER = '''from typing import Any, Optional, TYPE_CHECKING

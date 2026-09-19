@@ -197,7 +197,8 @@ class QuickEvents:
 
 
 
-# x = QuickEvent()
+# x = QuickEvents()
+# x.selectById("").addClass()
 
 # el1 = x.selectById("1")
 # el2 = x.selectById("2")
