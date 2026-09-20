@@ -1,6 +1,6 @@
 [project]
 name = "nexelpy"
-version = "1.14.24"
+version = "1.14.25"
 description = "comingsoon"
 readme = "README.md"
 requires-python = ">=3.8"
