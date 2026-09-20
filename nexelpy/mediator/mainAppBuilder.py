@@ -101,8 +101,13 @@ class MainAppBuilder(Starlette):
         if not source.exists():
             raise FileNotFoundError(source)
         if self.nexel_venv_path.exists():
-            shutil.rmtree(self.nexel_venv_path)
-        shutil.copytree(source, self.nexel_venv_path)
+            import stat
+            def _remove_readonly(func, path, _):
+                os.chmod(path, stat.S_IWRITE)
+                func(path)
+            shutil.rmtree(self.nexel_venv_path, onerror=_remove_readonly)
+        shutil.copytree(source, self.nexel_venv_path,symlinks=True, dirs_exist_ok=False)
+
 
     def add_manual_route(self,route: str = "",prefix: str = "",method: str | Iterable[str] | None = None,func: Callable[..., Any] | None = None,) -> Callable[..., Any]:
         if func is None or not callable(func):

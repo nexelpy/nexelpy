@@ -15,6 +15,6 @@ class Vapi(PluginBuilder):
                 "HEAD_tag":self.HEAD_tag.content,
                 "BODY_tag": self.BODY_tag.content}
 
-        response = JSONResponse(content= json.dumps(final_data, ensure_ascii=False) ,status_code=200,headers=self.Headers.build_header())
+        response = JSONResponse(content=final_data, status_code=200, headers=self.Headers.build_header())
         self._setCookiesFromList(response=response)
         return response
