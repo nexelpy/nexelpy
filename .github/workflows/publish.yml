@@ -8,9 +8,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
+      id-token: GAPGPTMASKTOKEN5xwna4je0toX0X
       contents: read
-      attestations: write
+      attestations: GAPGPTMASKTOKEN5xwna4je0toX1X
 
     steps:
       - uses: actions/checkout@v4
