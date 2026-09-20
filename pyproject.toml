@@ -1,6 +1,6 @@
 [project]
 name = "nexelpy"
-version = "1.14.25"
+version = "1.14.26"
 description = "comingsoon"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -23,5 +23,13 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["nexelpy", "nexelpy.*"]
+include = ["nexelpy*"]
+namespaces = true
+
+[tool.setuptools.package-data]
+nexelpy = [
+    "*.html", "*.css", "*.js", "*.ts", "*.json", "*.db", "*.sqlite", "*.sqlite3",
+    "*/*.html", "*/*.css", "*/*.js", "*/*.ts", "*/*.json", "*/*.db", "*/*.sqlite", "*/*.sqlite3",
+    "*/*/*.html", "*/*/*.css", "*/*/*.js", "*/*/*.ts", "*/*/*.json", "*/*/*.db", "*/*/*.sqlite", "*/*/*.sqlite3"
+]
 

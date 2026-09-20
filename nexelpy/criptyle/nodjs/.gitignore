@@ -1,1 +1,12 @@
-*/
+# Ignore all extracted node folders
+node-*/
+
+# Ignore all downloaded archive files
+*.tar.xz
+*.tar.gz
+*.zip
+
+# Keep the directory tracked in git
+!.gitignore
+!.gitkeep
+
