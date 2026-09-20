@@ -7,10 +7,13 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/nexelpy
     permissions:
       id-token: write
       contents: read
-      attestations: write
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -32,4 +35,5 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           attestations: false
+          verbose: true
 
