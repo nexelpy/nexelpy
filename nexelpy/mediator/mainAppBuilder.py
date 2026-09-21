@@ -16,6 +16,7 @@ import shutil
 from typing import Any,Callable,Iterable
 from .registerations.url_checker import UrlChecker
 from .nodExtractor import NodeExtractor
+from .node_download_manager import NodeDownloadManager
 
 console = Console()
 
@@ -41,11 +42,16 @@ class nexelStaticFiles(StaticFiles):
 class MainAppBuilder(Starlette):
     def __init__(self, file=__file__, devMode=True,mountStatics=True,secretKey=None):
         super().__init__(exception_handlers={ RedirectException: redirect_exception_handler })
-        NodeExtractor().extract_if_needed()
+        # NodeExtractor().extract_if_needed()
         self.file = file
         self.root_Path = os.path.dirname(os.path.abspath(file))
         self.devMode = devMode
         self.manual_routes: list[dict[str, Any]] = []
+
+        #nodjs download manager
+        # print("nodjs manager")
+        if not self.devMode or Reloader.is_child():
+            NodeDownloadManager(__file__).ensure_node()
 
         #copy nexel-venv
         self.nexel_venv_path = Path(self.root_Path) / "nexel_venv"
@@ -132,3 +138,4 @@ class MainAppBuilder(Starlette):
                 self.routes.append(static_route)
                 break
         return func
+#####
