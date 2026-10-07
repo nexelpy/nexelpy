@@ -1,5 +1,6 @@
 from typing import Any
 from html import escape
+import json
 
 class TagBuilder:
     def __init__(self, tagName:str="NoName", text:str="", selfClose:bool=False, props:str="", parent=None, **attributes:dict[str, Any]):
@@ -20,7 +21,12 @@ class TagBuilder:
     @property
     def build_tag(self):
         tag = self.tagName
-        attrs = " ".join(f'{k.lower().replace("__", "-")}="{escape(str(v), quote=True)}"' for k, v in self.attribute.items()) if self.attribute else ""
+        # attrs = " ".join(f'{k.replace("Class","class").replace("__", "-")}="{escape(str(v), quote=True)}"' for k, v in self.attribute.items()) if self.attribute else ""
+        attrs = " ".join(
+            f"{k.replace('Class', 'class').replace('__', '-')}="
+            f"'{escape(json.dumps(v, ensure_ascii=False) if isinstance(v, (list, dict)) else str(v), quote=True)}'"
+            for k, v in self.attribute.items()) if self.attribute else ""
+
         vla = self.props
         vla = self.props
         if self.selfClose:

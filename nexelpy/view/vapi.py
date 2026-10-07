@@ -1,4 +1,3 @@
-import json
 from .pluginBuilder import PluginBuilder
 from starlette.responses import JSONResponse
 from .headTagAnalyzer import HeadTagAnalyzer
@@ -12,8 +11,9 @@ class Vapi(PluginBuilder):
         HeadTagAnalyzer(self.HEAD_tag).analyze()
         final_data = {
                 "data": data,
-                "HEAD_tag":self.HEAD_tag.content,
-                "BODY_tag": self.BODY_tag.content}
+                "links":self.HEAD_tag.content,
+                "view": self.BODY_tag.content,
+                }
 
         response = JSONResponse(content=final_data, status_code=200, headers=self.Headers.build_header())
         self._setCookiesFromList(response=response)

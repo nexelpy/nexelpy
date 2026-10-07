@@ -18,6 +18,7 @@ class PluginBuilder(FormBuilder, CookiesManager):
         self._PathBuilder = PathBuilder(file_path=file, root=self._root_path)
         self._scope_token = self._make_scope_token()
 
+        # self.raw("<!doctype html>",parent=self.elementsContainer)
         self.element("!DOCTYPE html", selfClose=True, parent=self.elementsContainer)
         self.HTML_tag = self.element("html", parent=self.elementsContainer)
         self.HEAD_tag = self.element("head", parent=self.HTML_tag)
