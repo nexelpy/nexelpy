@@ -11,7 +11,7 @@ import { showModal, hideModal } from './modal.js';
 import { popOver, popHide } from './popover.js';
 import { transitionsMap } from '../transitions/index.js';
 import * as timerFx from './timer.js';
-
+import { debounceEvent } from './debounceEvent.js';
 
   
 
@@ -32,5 +32,6 @@ export const commandsMap = {
   showModal,
   hideModal,
   popOver,
-  popHide
+  popHide,
+  debounceEvent
 };

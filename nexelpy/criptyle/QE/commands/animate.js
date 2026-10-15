@@ -1,18 +1,17 @@
 import { qsa } from '../core/dom-query.js';
 
-export function animate(selector, css, delay = 0, duration = 300, ease = 'ease') {
-  const promises = [];
+export const animate = async (selector, css, delay = 0, duration = 300, ease = 'ease') => {
+    const elements = qsa(selector);
+    if (!elements.length) return;
 
-  qsa(selector).forEach(el => {
-    const anim = el.animate([{}, css], {
-      delay,
-      duration,
-      easing: ease,
-      fill: 'forwards'
+    const animations = elements.map((el) => {
+        return el.animate([{}, css], {
+            delay: Number(delay) || 0,
+            duration: Number(duration) || 300,
+            easing: ease || 'ease',
+            fill: 'forwards'
+        }).finished.catch(() => {});
     });
 
-    promises.push(anim.finished);
-  });
-
-  return Promise.all(promises);
-}
+    await Promise.all(animations);
+};

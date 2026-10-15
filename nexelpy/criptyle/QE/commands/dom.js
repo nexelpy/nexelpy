@@ -23,16 +23,21 @@ export function setText(selector, text, delay = 0, transition) {
 export function appendText(selector, text, delay = 0) {
   const els = qsa(selector);
   return withDelay(() => {
-    els.forEach(el => { el.textContent += text; });
+    els.forEach(el => {
+      el.insertAdjacentText('beforeend', text);
+    });
   }, delay);
 }
 
 export function prependText(selector, text, delay = 0) {
   const els = qsa(selector);
   return withDelay(() => {
-    els.forEach(el => { el.textContent = text + el.textContent; });
+    els.forEach(el => {
+      el.insertAdjacentText('afterbegin', text);
+    });
   }, delay);
 }
+
 
 export function setHtml(selector, html, delay = 0) {
   const els = qsa(selector);

@@ -1,16 +1,38 @@
 import { runEffects } from './runner.js';
+import { findDebounce } from './commands/debounceEvent.js';
 
 const ALLOWED_EVENTS = [
   'click', 'dblclick',
   'keyup', 'keydown',
   'change', 'input', 'submit',
   'focus', 'blur',
-  'mouseenter', 'mouseleave','tick'
+  'mouseenter', 'mouseleave', 'tick'
 ];
 
-// ============================================
-// Register event listeners
-// ============================================
+const debounceTimers = new WeakMap();
+
+function scheduleDebounced(target, eventType, wait, effects) {
+  let bucket = debounceTimers.get(target);
+  if (!bucket) {
+    bucket = new Map();
+    debounceTimers.set(target, bucket);
+  }
+
+  const prev = bucket.get(eventType);
+  if (prev) clearTimeout(prev);
+
+  const list = Array.isArray(effects[0]) ? effects : [effects];
+  const rest = list.filter(effect => !(Array.isArray(effect) && effect[0] === 'debounceEvent'));
+
+  const timer = setTimeout(() => {
+    bucket.delete(eventType);
+    runEffects(rest, { element: target }).catch(err => {
+      console.error(`runEffects error: ${err.message}`);
+    });
+  }, wait);
+
+  bucket.set(eventType, timer);
+}
 
 ALLOWED_EVENTS.forEach(eventType => {
   document.addEventListener(eventType, async (e) => {
@@ -33,6 +55,12 @@ ALLOWED_EVENTS.forEach(eventType => {
       return;
     }
 
+    const wait = findDebounce(effects);
+    if (wait != null) {
+      scheduleDebounced(target, eventType, wait, effects);
+      return;
+    }
+
     try {
       await runEffects(effects, {
         element: target,
@@ -43,10 +71,6 @@ ALLOWED_EVENTS.forEach(eventType => {
     }
   });
 });
-
-// ============================================
-// loadDom
-// ============================================
 
 async function initLoadDom() {
   const els = document.querySelectorAll('[loadDom]');

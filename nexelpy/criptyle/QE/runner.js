@@ -3,6 +3,8 @@ import { commandsMap } from './commands/index.js';
 import { ajax } from './commands/ajax.js';
 import { runFunc } from './core/run-func.js';
 import { evaluateSingleCondition } from './resolve/evaluate.js';
+import { GETS, runGet, runUpdate } from './resolve/gets.js';
+
 
 // ============================================
 // wait
@@ -90,7 +92,6 @@ async function runForLoop(list, startIndex, context) {
   const body = list.slice(startIndex + 1, bodyEnd);
 
   // ============================================
-  // ۱. تولید لیست
   // ============================================
   const newList = [];
 
@@ -231,6 +232,7 @@ export async function runEffects(effects, context = {}, options = {}) {
   context.ok = context.ok ?? true;
   context.response = context.response ?? null;
   context.loop = context.loop ?? null;
+  context.vars = context.vars ?? {};
 
   const list = Array.isArray(effects[0]) ? effects : [effects];
   let pending = [];
@@ -322,6 +324,25 @@ export async function runEffects(effects, context = {}, options = {}) {
         await resolve(effect, context);
       } catch (err) {
         console.error(`Resolve error in "${action}": ${err.message}`);
+      }
+      continue;
+    }
+
+    if (action === 'update') {
+  try {
+    await runUpdate(args, context);
+  } catch (err) {
+    console.error(`Error in "update": ${err.message}`);
+  }
+  continue;
+}
+
+    // ---- get* :
+    if (GETS.has(action)) {
+      try {
+        await runGet(effect, context);
+      } catch (err) {
+        console.error(`Error in "${action}": ${err.message}`);
       }
       continue;
     }

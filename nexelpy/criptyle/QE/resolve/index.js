@@ -2,10 +2,10 @@ import { routeResolve, NOT_FOUND } from './router.js';
 import { SKIP } from '../core/skip.js';
 import { runFunc } from '../core/run-func.js';
 import { evalTemplate } from './template.js';
+import { GETS, runGet } from './gets.js';
 
-// Main resolver
 export async function resolve(arg, context) {
-  // runFunc (returns value)
+
   if (Array.isArray(arg) && arg[0] === 'runFunc') {
     const [, path, name, ...args] = arg;
     const resolvedArgs = await Promise.all(
@@ -14,23 +14,38 @@ export async function resolve(arg, context) {
     return await runFunc(path, name, ...resolvedArgs);
   }
 
-  // Try router
+  if (Array.isArray(arg) && GETS.has(arg[0])) {
+    return runGet(arg, context);
+  }
+
   const routed = await routeResolve(arg, context);
   if (routed !== NOT_FOUND) return routed;
 
-  // String — template-eval if `{...}` and loop context
   if (typeof arg === 'string') {
-    if (arg.includes('{') && context.loop) {
-      const result = evalTemplate(arg, context.loop);
+    if (arg.includes('{') && (context.loop || context.vars)) {
+      const scope = { ...(context.vars || {}), ...(context.loop || {}) };
+      const result = evalTemplate(arg, scope);
+
+      if (context.loop) {
+        for (const key of Object.keys(context.loop)) {
+          context.loop[key] = scope[key];
+        }
+      }
+
+      context.vars ??= {};
+      for (const key of Object.keys(scope)) {
+        if (!context.loop || !Object.prototype.hasOwnProperty.call(context.loop, key)) {
+          context.vars[key] = scope[key];
+        }
+      }
+
       return result.value;
     }
     return arg;
   }
 
-  // Primitive
   if (arg == null || typeof arg !== 'object') return arg;
 
-  // Array
   if (Array.isArray(arg)) {
     const resolved = await Promise.all(
       arg.map(item => resolve(item, context))
@@ -39,7 +54,6 @@ export async function resolve(arg, context) {
     return resolved;
   }
 
-  // Object
   const result = {};
   for (const [key, value] of Object.entries(arg)) {
     const resolved = await resolve(value, context);
@@ -49,5 +63,4 @@ export async function resolve(arg, context) {
   return result;
 }
 
-// Re-export SKIP
 export { SKIP } from '../core/skip.js';

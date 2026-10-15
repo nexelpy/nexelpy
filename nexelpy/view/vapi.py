@@ -11,7 +11,7 @@ class Vapi(PluginBuilder):
         HeadTagAnalyzer(self.HEAD_tag).analyze()
         final_data = {
                 "data": data,
-                "links":self.HEAD_tag.content,
+                "QE_links_header":self.HEAD_tag.content,
                 "view": self.BODY_tag.content,
                 }
 
