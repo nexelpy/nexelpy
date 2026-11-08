@@ -7,14 +7,15 @@ class Vapi(PluginBuilder):
         super().__init__(file=file)
         
 
-    def RESPONSE(self,**data):
+    def RESPONSE(self,status_code=200,status_message="",**data):
         HeadTagAnalyzer(self.HEAD_tag).analyze()
         final_data = {
-                "data": data,
+                **data ,
                 "QE_links_header":self.HEAD_tag.content,
                 "view": self.BODY_tag.content,
+                "status_message":status_message,
                 }
 
-        response = JSONResponse(content=final_data, status_code=200, headers=self.Headers.build_header())
+        response = JSONResponse(content=final_data, status_code=status_code , headers=self.Headers.build_header())
         self._setCookiesFromList(response=response)
         return response

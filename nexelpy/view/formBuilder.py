@@ -6,7 +6,7 @@ class FormBuilder(ElementBuilder):
         super().__init__()
         self.REQUEST = request
 
-    def form(self, action="#", method="post", props="", parent=None, **attributes):
+    def form(self, action="", method="", props="", parent=None, **attributes):
         attributes["method"] = method
         attributes["action"] = action
         return self.element(tagName="form", props=props, parent=parent, **attributes)

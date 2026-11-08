@@ -31,3 +31,4 @@ class CookiesManager:
         for cookie in self._cookies_list:
             params = {k: v for k, v in cookie.items() if v is not None}
             response.set_cookie(**params)
+
