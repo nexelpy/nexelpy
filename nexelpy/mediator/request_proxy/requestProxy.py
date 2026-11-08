@@ -8,19 +8,20 @@ class RequestProxy:
     def _get_original_request(self) -> R:
         return get_request()
     
-    def _pick(self, data: dict, *keys):
+    def _pick(self, data, *keys):
         if not keys:
             return data
-        return data.get(keys[0]) if len(keys) == 1 else [data.get(k) for k in keys]
+        if len(keys) == 1:
+            return data.get(keys[0])
+        return [data.get(k) for k in keys]
 
     async def app(self):
-        return self._get_original_request().app
+        """Return the running application (MainAppBuilder, a Starlette subclass)."""
+        return self._get_original_request().scope.get("app")
 
     async def scope(self, *keys):
         return self._pick(self._get_original_request().scope, *keys)
     
-    async def mainApp(self, *keys):
-        return await self.scope("app")
 
     async def method(self) -> str:
         return self._get_original_request().method
@@ -63,7 +64,8 @@ class RequestProxy:
         form = await self._get_original_request().form()
         return self._pick(dict(form), *keys)
 
-    async def stream(self): # request.stream() is a low‑level body reader and consumes the request body. After using it, body(), json(), or form() may no longer work.
+    def stream(self):
+        """Return the raw async generator. Use: async for chunk in x.Request.stream(): ..."""
         return self._get_original_request().stream()
     
     async def session(self, *keys):
@@ -75,10 +77,14 @@ class RequestProxy:
         method = method.upper()
         handlers = {
             "GET": self.args,
-            "PATH":self.path_params,
+            "PATH": self.path_params,
             "JSON": self.json,
-            "POST": self.form}
-        return await handlers.get(method,None)(*keys)
+            "POST": self.form,
+        }
+        fn = handlers.get(method)
+        if fn is None:
+            raise ValueError(f"unsupported payload method: {method}")
+        return await fn(*keys)
     
 
 request = RequestProxy()

@@ -76,14 +76,8 @@ class HeaderBuilder:
 
     def add_raw_header(self, **headers):
         for key, value in headers.items():
-            self._raw_headers[key.replace('_', '-').replace("__","-")] = value
+            self._raw_headers[key.replace("__","-")] = value
         return self
-    
-    def build_header(self):
-        self._final_header = {}
-        for builder in self._obj_classes:
-            self._final_header.update(builder.build_header())
-        return self._final_header
     
     def set_super_strict(self):
         self.add_raw_header(
@@ -153,68 +147,3 @@ class HeaderBuilder:
         self._final_header.update(self._raw_headers)
         
         return self._final_header
-
-
-
-
-
-
-
-# headers = HeaderBuilder()
-
-# # CSP
-# headers.csp.add('default-src', "'self'")
-# headers.csp.add('script-src', "'self'", "https://example.com")
-
-# # HSTS
-# headers.hsts(max_age=31536000, include_subdomains=True, preload=True)
-
-# # Cache-Control
-# headers.cache(cache_control="public", max_age=31536000)
-
-# # X-Frame-Options
-# headers.frame_options(policy="DENY")
-
-# # X-Content-Type-Options
-# headers.content_type_options()
-
-# # Referrer-Policy
-# headers.referrer_Policy()
-
-# # Permissions-Policy
-# headers.permissions_Policy.add('geolocation', 'self')
-# headers.permissions_Policy.add('camera')
-# headers.permissions_Policy.add('microphone')
-# headers.permissions_Policy.add('autoplay', '*')
-
-# # Cross-Origin-Opener-Policy
-# headers.cross_origin_opener(policy="same-origin")
-
-# # Cross-Origin-Embedder-Policy
-# headers.cross_origin_embedder(policy="require-corp")
-
-# # Cross-Origin-Resource-Policy
-# headers.cross_origin_resource(policy="same-origin")
-
-# # Origin-Agent-Cluster
-# headers.origin_agent_cluster()
-
-# # Clear-Site-Data - پاک کردن کوکی‌ها و کش
-# headers.clear_site_data('cookies', 'cache')
-
-# result = headers.build_header()
-# print(result)
-# # {
-# #   'Content-Security-Policy': "...",
-# #   'Strict-Transport-Security': '...',
-# #   'Cache-Control': '...',
-# #   'X-Frame-Options': 'DENY',
-# #   'X-Content-Type-Options': 'nosniff',
-# #   'Referrer-Policy': '...',
-# #   'Permissions-Policy': '...',
-# #   'Cross-Origin-Opener-Policy': 'same-origin',
-# #   'Cross-Origin-Embedder-Policy': 'require-corp',
-# #   'Cross-Origin-Resource-Policy': 'same-origin',
-# #   'Origin-Agent-Cluster': '?1',
-# #   'Clear-Site-Data': '"cookies", "cache"'
-# # }

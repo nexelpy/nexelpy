@@ -1,6 +1,6 @@
 from ..view.pageBuilder import PageBilder
 
-async def show_error_in_views(errrr,file):
+async def show_error_in_view(error_info,file):
     x = PageBilder(file)
     x.style(text = """
 body {
@@ -104,8 +104,8 @@ li:nth-child(4)::before {
     color: #ff66ff;
 }
 """,parent=x.HEAD_tag)
-    x.h2("nexelpy erorr")
+    x.h2("NexelPy error")
     with x.ul():
-        for i in errrr:
-            x.li(f"{i} : {errrr[i]}")
+        for key, value in error_info.items():
+            x.li(f"{key} : {value}")
     return x.RESPONSE()

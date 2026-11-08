@@ -1,35 +1,47 @@
+import logging
+import traceback
+from datetime import datetime
 
 from .request_proxy.request_object import set_request, reset_request
-# from . import _Global_nexelpy_var
-from .show_erorr_in_view import show_error_in_views
-import traceback
+from .show_error_in_view import show_error_in_view
 from .reDirect import RedirectException
+
+logger = logging.getLogger("nexelpy.handler")
+
+
+def _find_user_frame(tb):
+    frames = traceback.extract_tb(tb)
+    user_frames = [f for f in frames if "nexelpy" not in f.filename]
+    return user_frames[-1] if user_frames else (frames[-1] if frames else None)
+
 
 def wraper_handler(handler):
     async def endpoint(request):
-
         token = set_request(request)
-        
-        try: 
+        try:
             return await handler()
-        
-        
         except RedirectException:
             raise
         except Exception as e:
-            from datetime import datetime
-            now = datetime.now().strftime("%H:%M:%S")
-            tb = traceback.extract_tb(e.__traceback__)
-            last = tb[-1]
-            filename = last.filename
-            lineno = last.lineno
-            code = last.line
-            
-            # _Global_nexelpy_var.erorr.append({"time":now,"e":e})
-            mainapp = request.scope.get("app")
-            if mainapp.devMode:
-                return await show_error_in_views({"Time":now,"Erorr":e,"Module path":"/root"+filename,"Line number":lineno,"Code":code},file=mainapp.file)
+            logger.exception("Unhandled exception in handler")
 
+            mainapp = request.scope.get("app")
+            if getattr(mainapp, "devMode", False):
+                now = datetime.now().strftime("%H:%M:%S")
+                frame = _find_user_frame(e.__traceback__)
+                info = {
+                    "Time": now,
+                    "Error": e,
+                    "Module path": getattr(frame, "filename", "?"),
+                    "Line number": getattr(frame, "lineno", "?"),
+                    "Code": getattr(frame, "line", "?"),
+                }
+                try:
+                    return await show_error_in_view(info, file=mainapp.file)
+                except Exception:
+                    logger.exception("Failed to render error view")
+
+            raise
         finally:
             reset_request(token)
 

@@ -1,10 +1,12 @@
 import json
+import time
 from cryptography.fernet import Fernet
 
 
 class SessionManager:
 
     _fernet = None
+    MAX_TTL = 3600 * 24 * 30  # 30 days hard cap
 
     @classmethod
     def initialize(cls, secret_key: bytes):
@@ -18,15 +20,23 @@ class SessionManager:
         return cls._fernet
 
     @classmethod
-    def encrypt(cls, data: dict) -> str:
-        json_data = json.dumps(data)
-        encrypted = cls.get_fernet().encrypt(json_data.encode())
-        return encrypted.decode()
+    def encrypt(cls, data: dict, max_age: int = 3600 * 24) -> str:
+        max_age = min(max_age, cls.MAX_TTL)
+        payload = {
+            "_exp": int(time.time()) + max_age,
+            "data": data,
+        }
+        token = cls.get_fernet().encrypt(json.dumps(payload).encode())
+        return token.decode()
 
     @classmethod
     def decrypt(cls, token: str) -> dict:
         try:
-            decrypted = cls.get_fernet().decrypt(token.encode())
-            return json.loads(decrypted)
+            raw = cls.get_fernet().decrypt(token.encode(), ttl=None)
+            payload = json.loads(raw)
+            exp = payload.get("_exp", 0)
+            if exp and time.time() > exp:
+                return {}
+            return payload.get("data", {})
         except Exception:
             return {}
