@@ -20,6 +20,8 @@ from .registerations.regestrationBuilder import RegistrationBuilder
 from .session_proxy.session_middleware import SessionManager
 from typing import Any, Callable, Iterable
 from .registerations.url_checker import UrlChecker
+from .csrf.csrfMiddleware import CSRFMiddleware
+from .csrf.csrfManager import CSRFManager
 
 console = Console()
 
@@ -80,7 +82,7 @@ class MainAppBuilder(Starlette):
             secretKey = Fernet.generate_key()
         SessionManager.initialize(secretKey)
         self.add_middleware(NexelpySessionMiddleware)
-
+        self.add_middleware(CSRFMiddleware)
         # ---------- 5. static + .nexelpy ----------
         root_dir = Path(self.file).resolve().parent
         (root_dir / ".nexelpy").touch(exist_ok=True)

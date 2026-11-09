@@ -25,19 +25,6 @@ class PluginBuilder(FormBuilder, CookiesManager):
         self.BODY_tag = self.element("body", parent=self.HTML_tag)
        
 
-
-    # def _add_nextyle_link(self, nextyle, default_parent=None):
-    #     if nextyle is not None:
-    #         attrs = getattr(nextyle, "_tag_attrs", {}).copy()
-    #         parent = attrs.pop("parent", default_parent or self.HEAD_tag)
-    #         self.element("link", parent=parent, rel="stylesheet", href=nextyle.href, selfClose=True, **attrs)
-
-    # def _add_nexcript_script(self, nexcript, default_parent=None):
-    #     if nexcript is not None:
-    #         attrs = getattr(nexcript, "_tag_attrs", {}).copy()
-    #         parent = attrs.pop("parent", default_parent or self.HEAD_tag)
-    #         self.element("script", parent=parent, src=nexcript.src, **attrs)
-
     def scoping(self, text="", props="", parent=None, **attributes):
         attributes["data-scoping"] = self._scope_token
         return self.element(tagName="div", text=text, props=props, parent=parent, **attributes)
