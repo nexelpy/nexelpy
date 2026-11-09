@@ -51,7 +51,7 @@ class ModuleInspector:
 
                 for dec in node.decorator_list:
                     decorator_name = self._extract_decorator_name(dec)
-                    if decorator_name == 'AutoRegister':
+                    if decorator_name == 'Route':
                         self._inspect_python_file.append(module_name)
                         found = True
                         break

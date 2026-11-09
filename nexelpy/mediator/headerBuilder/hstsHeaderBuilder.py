@@ -1,13 +1,3 @@
-# class HSTSHeaderBuilder:
-
-#     header_name = "Strict-Transport-Security"
-
-#     def __init__(self,max_age=31536000,include_subdomains=True,preload=False):
-#         self.parts = [f"max-age={max_age}","includeSubDomains" if include_subdomains else "","preload" if preload else ""]
-
-#     def build(self):
-#         return "; ".join(filter(None, self.parts))
-
 
 class HSTSHeaderBuilder:
     def __init__(self, max_age=31536000, include_subdomains=True, preload=False):

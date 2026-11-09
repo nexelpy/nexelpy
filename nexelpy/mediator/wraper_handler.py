@@ -23,10 +23,15 @@ def wraper_handler(handler):
         except RedirectException:
             raise
         except Exception as e:
-            logger.exception("Unhandled exception in handler")
-
             mainapp = request.scope.get("app")
-            if getattr(mainapp, "devMode", False):
+            is_local = getattr(mainapp, "is_local", False)
+
+            # In production, log the full traceback to console
+            if not is_local:
+                logger.exception("Unhandled exception in handler")
+
+            # In local/dev, show the beautiful graphical error page
+            if is_local:
                 now = datetime.now().strftime("%H:%M:%S")
                 frame = _find_user_frame(e.__traceback__)
                 info = {

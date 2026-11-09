@@ -1,5 +1,5 @@
 
-from .mediator.registerations.decorators import AutoRegister
+from .mediator.registerations.decorators import Route
 from .view.pluginBuilder import PluginBuilder as Plugin
 from .view.pageBuilder import PageBilder as View
 from .view.vapi import Vapi

@@ -23,12 +23,8 @@ def nexel_error(source: str, **info: Any) -> None:
     sys.exit(1)
 
 
-def AutoRegister(
-    route: str = "/",
-    method: Iterable[str] | None = ["GET"],
-    prefix: str | None = "",
-) -> Callable:
-
+def Route(route: str = "/", methods: Iterable[str] | None = ["GET"], prefix: str | None = ""):
+    
     def decorator(func: Callable) -> Callable:
         module = func.__module__
 
@@ -41,7 +37,7 @@ def AutoRegister(
         # --------------------------------------------------
         if not inspect.iscoroutinefunction(func):
             nexel_error(
-                "AutoRegister",
+                "Route",
                 type="SyncFunctionError",
                 module=module,
                 line=line,
@@ -53,7 +49,7 @@ def AutoRegister(
 
         if not ok:
             nexel_error(
-                "AutoRegister",
+                "Route",
                 type="InvalidRouteError",
                 module=module,
                 line=line,
@@ -69,7 +65,7 @@ def AutoRegister(
         existing = registry.find_by_path(full_path)
         if existing:
             nexel_error(
-                "AutoRegister",
+                "Route",
                 type="DuplicateRouteError",
                 path=full_path,
                 new_module=module,
@@ -82,7 +78,7 @@ def AutoRegister(
         # --------------------------------------------------
         registry.register({
             "path": full_path,
-            "method": list(method) if method else ["GET"],
+            "methods": list(methods) if methods else ["GET"],
             "handler": func,
             "module": module,
             "line": line,

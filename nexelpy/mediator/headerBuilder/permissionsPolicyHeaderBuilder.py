@@ -1,16 +1,3 @@
-# class PermissionsPolicyHeaderBuilder:
-#     header_name = "Permissions-Policy"
-
-#     __slots__ = ("_directives",)
-
-#     def __init__(self, *directives: str):
-#         self._directives = directives
-
-#     def build(self):
-#         if not self._directives:
-#             return None
-#         return ", ".join(self._directives)
-
 
 class PermissionsPolicyHeaderBuilder:
     __slots__ = ['policies']

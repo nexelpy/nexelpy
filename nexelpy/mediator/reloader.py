@@ -63,19 +63,13 @@ class Reloader:
         self,
         entry_file: str,
         watch_dir: Optional[str] = None,
-        exts: Sequence[str] = (
-            ".py", ".html", ".css", ".js", ".ts", ".tsx", ".jsx", ".json",
-        ),
+        exts: Sequence[str] = (".py",),
         ignore_dirs: Sequence[str] = (
             "__pycache__", ".git", ".idea", ".venv", "venv", "env",
             "node_modules", ".pytest_cache", ".mypy_cache",
             "nexel_venv", "dist", "build", ".tox", ".eggs",
         ),
-        ignore_paths: Sequence[str] = (
-        "uploads/", "media/", "data/", "storage/", "tmp/",
-        "*.db", "*.sqlite", "*.sqlite3", "*.log", "*.bin",
-        "*.pyc", "*.pyo",
-    ),
+        extra_ignore_dirs: Optional[Sequence[str]] = None,  # Added parameter for user-defined ignore dirs
         poll_interval: float = 0.4,
         restart_on_child_exit: bool = True,
         restart_delay: float = 0.5,
@@ -87,7 +81,12 @@ class Reloader:
         self.entry_file = Path(entry_file).resolve()
         self.watch_dir = Path(watch_dir).resolve() if watch_dir else self.entry_file.parent
         self.exts = tuple(e.lower() for e in exts)
+        
+        # Merge default ignore dirs with user-provided ones
         self.ignore_dirs = set(ignore_dirs)
+        if extra_ignore_dirs:
+            self.ignore_dirs.update(extra_ignore_dirs)
+            
         self.poll_interval = poll_interval
         self.restart_on_child_exit = restart_on_child_exit
         self.restart_delay = restart_delay
@@ -114,17 +113,7 @@ class Reloader:
     def is_child(cls) -> bool:
         return os.getenv(cls.CHILD_ENV_KEY) == "1"
 
-
     def _should_include(self, path: Path) -> bool:
-        # explicit ignore patterns
-        for pattern in self.ignore_paths:
-            if path.match(pattern):
-                return False
-            if pattern.endswith("/") and any(part == pattern.rstrip("/") for part in path.parts):
-                return False
-        name = path.name
-        if name == ".env" or name.startswith(".env."):
-            return True
         return path.suffix.lower() in self.exts
 
     def _iter_files(self) -> Iterable[Path]:
@@ -175,7 +164,7 @@ class Reloader:
         env[self.READY_ENV_KEY] = str(self._ready_file)
 
         cmd = [sys.executable, str(self.entry_file)]
-        self.logger("=" * 80)
+       
         dlog(f"_spawn_child: cmd={cmd} ready_file={self._ready_file}")
         p = subprocess.Popen(cmd, env=env)
         dlog(f"_spawn_child: pid={p.pid}")
@@ -213,13 +202,7 @@ class Reloader:
         self._child = self._spawn_child()
 
     def run(self) -> None:
-        logo_text = Text("nexelpy", style="bold purple", justify="center")
-        panel = Panel(Align.center(logo_text), border_style="purple", width=80, padding=(0, 1))
-        console.print(panel)
-        console.print(
-            f"[bold][NexelPy Registration][/bold] [yellow]watching:[/yellow] "
-            f"{self.watch_dir} [yellow]directory[/yellow] "
-        )
+
         if DEBUG:
             console.print(f"[dim]debug log -> {_LOG_PATH}[/dim]")
 

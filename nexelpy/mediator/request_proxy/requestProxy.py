@@ -68,7 +68,7 @@ class RequestProxy:
         """Return the raw async generator. Use: async for chunk in x.Request.stream(): ..."""
         return self._get_original_request().stream()
     
-    async def session(self, *keys):
+    async def session_clientSide(self, *keys):
         request = self._get_original_request()
         session_data = request.scope.get("state", {}).get("n-session", {})
         return self._pick(session_data, *keys)

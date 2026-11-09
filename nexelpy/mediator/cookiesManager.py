@@ -59,7 +59,7 @@ class CookiesManager:
                 "partitioned": False,
             })
 
-    def set_Session(
+    def set_session_clientSide(
         self,
         path: str = "/",
         secure: bool | None = None,
@@ -79,7 +79,7 @@ class CookiesManager:
         if len(encrypted) > 3800:
             raise ValueError("session payload too large; keep session data small")
         self.set_Cookie(
-            "n-session",
+            "session_clientSide",
             encrypted,
             path=path,
             secure=secure,

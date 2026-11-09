@@ -1,13 +1,3 @@
-# class CrossOriginEmbedderPolicyHeaderBuilder:
-#     header_name = "Cross-Origin-Embedder-Policy"
-
-#     __slots__ = ("_value",)
-
-#     def __init__(self, value: str = "require-corp"):
-#         self._value = value
-
-#     def build(self) -> str:
-#         return self._value
 
 
 class CrossOriginEmbedderPolicyHeaderBuilder:
