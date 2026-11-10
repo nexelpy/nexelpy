@@ -1,17 +1,20 @@
 import inspect
 import os
-import re
 import subprocess
 from pathlib import Path
-from ..sharedClasses.nextyle_nexcript_path_control import NexetyleNexcriptPathControl
+from ..sharedClasses import BasePathControl
 from .code_transformer import CodeTransformer
+from .runtime_info import RuntimeInfo
+from .detector import is_typescript
 
-class Nexcript(NexetyleNexcriptPathControl):
+
+class Nexcript(BasePathControl):
     def __init__(self, file: str | Path, export_path: str | Path | None = None):
         super().__init__(file)
+        self._info = RuntimeInfo()
+        self._node_exe = self._resolve_node_binary() if self._info.has_node else None
         self._export_file = self._resolve_export_path(export_path)
         self._code_list: list[dict[str, str]] = []
-        self._node_exe = self._resolve_node_binary()
         self.src = f"/{self._export_file.relative_to(self.project_root).as_posix()}"
 
     def __enter__(self):
@@ -22,8 +25,15 @@ class Nexcript(NexetyleNexcriptPathControl):
             self._export()
         return False
 
-    def raw_script(self, code: str):
-        self._code_list.append({"lang": "ts", "code": inspect.cleandoc(code)})
+    def raw_script(self, code: str, lang: str | None = None):
+        """
+        Add a script block.
+        If lang is None, it will be auto-detected (ts or js).
+        """
+        code = inspect.cleandoc(code)
+        if lang is None:
+            lang = "ts" if is_typescript(code) else "js"
+        self._code_list.append({"lang": lang, "code": code})
         return self
 
     def _resolve_export_path(self, export_path: str | Path | None) -> Path:
@@ -32,19 +42,46 @@ class Nexcript(NexetyleNexcriptPathControl):
         return self._resolve_file_path(export_path)
 
     def _resolve_node_binary(self) -> str:
+        # 1. Try isolated Node.js in criptyle/nodjs/
         nodjs_dir = Path(__file__).resolve().parent.parent / "nodjs"
-        pattern = "**/node.exe" if os.name == "nt" else "**/bin/node"
-        candidates = sorted(nodjs_dir.glob(pattern))
-        return str(candidates[0]) if candidates else "node"
-
-
+        if nodjs_dir.exists():
+            pattern = "**/node.exe" if os.name == "nt" else "**/bin/node"
+            candidates = sorted(nodjs_dir.glob(pattern))
+            if candidates:
+                return str(candidates[0])
+        # 2. Fallback to system node
+        return "node"
 
     def _transpile_ts(self, ts_code: str) -> str:
+        if not self._info.can_transpile_ts:
+            if not self._info.has_node:
+                raise RuntimeError(
+                    "Nexcript requires Node.js >= 22.6.0 to compile TypeScript. "
+                    "Please install Node.js from nodejs.org."
+                )
+            else:
+                raise RuntimeError(
+                    f"Nexcript requires Node.js >= 22.6.0 (found {self._info.node_version}). "
+                    "Please upgrade Node.js."
+                )
+
         try:
-            proc = subprocess.run([self._node_exe, "--experimental-strip-types", "-e", f"console.log(require('module').stripTypeScriptTypes({ts_code!r}))"], capture_output=True, text=True, check=True)
+            proc = subprocess.run(
+                [
+                    self._node_exe,
+                    "--experimental-strip-types",
+                    "-e",
+                    f"console.log(require('module').stripTypeScriptTypes({ts_code!r}))",
+                ],
+                capture_output=True, text=True, check=True, timeout=10,
+            )
             return proc.stdout.strip()
-        except Exception:
-            return re.sub(r":\s*(string|number|boolean|any)(\[\])?", "", ts_code)
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(
+                f"TypeScript compilation failed: {e.stderr.strip() or e.stdout.strip()}"
+            )
+        except Exception as e:
+            raise RuntimeError(f"TypeScript compilation failed: {e}")
 
     def _render(self) -> str:
         processed_blocks = []
@@ -52,7 +89,11 @@ class Nexcript(NexetyleNexcriptPathControl):
             raw_code = item["code"]
             if item["lang"] == "ts":
                 raw_code = self._transpile_ts(raw_code)
-            transformer = CodeTransformer(code=raw_code, path_control=self, scope_token=self.scoping_token)
+            transformer = CodeTransformer(
+                code=raw_code,
+                path_control=self,
+                scope_token=self.scope_token,
+            )
             processed_blocks.append(transformer.transform())
         return "\n\n".join(processed_blocks)
 

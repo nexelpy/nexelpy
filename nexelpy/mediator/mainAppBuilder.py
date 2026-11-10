@@ -22,6 +22,8 @@ from typing import Any, Callable, Iterable
 from .registerations.url_checker import UrlChecker
 from .csrf.csrfMiddleware import CSRFMiddleware
 from .csrf.csrfManager import CSRFManager
+import subprocess
+from ..criptyle.nexcript.runtime_info import RuntimeInfo
 
 console = Console()
 
@@ -52,7 +54,12 @@ class MainAppBuilder(Starlette):
         self.AutoRegister_list: list[dict] = []
         self.manual_routes: list[dict[str, Any]] = []
         self.ignore_watch_dirs = ignore_watch_dirs or []
-        self.has_node = shutil.which("node") is not None
+
+        #node
+        info = RuntimeInfo()
+        self.has_node = info.has_node
+        self.node_version_ok = info.node_version_ok
+        self.node_version = info.node_version
 
         # ---------- 2. Detect Parent Process ----------
         # If running via `python main.py` and not a child, we are the parent (watcher)

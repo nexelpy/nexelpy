@@ -26,5 +26,5 @@ class PathBuilder:
         project_root_str = str(self._project_root)
         resolved_path_str = str(resolved_path)
         if not resolved_path_str.startswith(project_root_str + os.sep) and resolved_path_str != project_root_str:
-            return ""  # Return empty string for invalid paths
+            return Path("/")  # Return "/" invalid paths
         return resolved_path

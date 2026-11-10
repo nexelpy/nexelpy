@@ -103,7 +103,7 @@ li:nth-child(4) {
 li:nth-child(4)::before {
     color: #ff66ff;
 }
-""",parent=x.HEAD_tag)
+""",parent=x.headTag)
     x.h2("NexelPy error")
     with x.ul():
         for key, value in error_info.items():

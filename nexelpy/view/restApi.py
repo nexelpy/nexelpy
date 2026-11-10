@@ -23,7 +23,7 @@ class RestApi(CookiesManager):
 
     def RESPONSE_file(self,path: str,media_type: str | None = None,download_name: str | None = None,background_task=None, disposition: Literal["attachment", "inline"] = "attachment",status_code: int = 200,):
         file_path = self._PathBuilder._resolve_file_path(path)
-        if file_path is False or not file_path.is_file():
+        if not file_path.is_file():
             response = Response(content="File not found",status_code=404,headers=self.Headers.build_header(),)
             self._setCookiesFromList(response=response)
             self._set_csrf_cookie_and_header(response)

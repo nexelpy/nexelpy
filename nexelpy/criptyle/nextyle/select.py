@@ -41,6 +41,8 @@ class Select:
         return method
 
     def __getattr__(self, name: str):
+        if name.startswith("__") and name.endswith("__"):
+            raise AttributeError(name)
         css_property_name = python_to_css_name(name)
         def dynamic_method(value: Optional[Any] = None, **kwargs) -> "Select":
             return self._add_prop(css_property_name, value, **kwargs)

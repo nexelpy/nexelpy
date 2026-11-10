@@ -8,7 +8,7 @@ class Vapi(PluginBuilder):
         
 
     def RESPONSE(self,status_code=200,status_message="",**data):
-        HeadTagAnalyzer(self.HEAD_tag).analyze()
+        HeadTagAnalyzer(self.headTag).analyze()
         final_data = {
                 **data ,
                 "QE_links_header":self.HEAD_tag.content,

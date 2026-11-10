@@ -4,19 +4,18 @@ from urllib.parse import urlencode
 from ..mediator.headerBuilder.headerBuilder import HeaderBuilder
 from .pathBuilder import PathBuilder
 from ..mediator.cookiesManager import CookiesManager
-import base64
-import hashlib
-# from .quickEvents.quickEventsBuilder import QuickEvents
+from ..criptyle.sharedClasses.scopeToken import _make_scope_token
+
 
 class PluginBuilder(FormBuilder, CookiesManager):
-    def __init__(self, file=None, ):
+    def __init__(self, file=None):
         super().__init__()
         self._plugin_return_func_data = None
         self.Headers = HeaderBuilder()
         self._file = file
         self._root_path = self.REQUEST._get_original_request().app.root_Path
         self._PathBuilder = PathBuilder(file_path=file, root=self._root_path)
-        self._scope_token = self._make_scope_token()
+        self._scope_token = _make_scope_token(file)
 
         # self.raw("<!doctype html>",parent=self.elementsContainer)
         self.element("!DOCTYPE html", selfClose=True, parent=self.elementsContainer)
@@ -28,10 +27,6 @@ class PluginBuilder(FormBuilder, CookiesManager):
     def scoping(self, text="", props="", parent=None, **attributes):
         attributes["data-scoping"] = self._scope_token
         return self.element(tagName="div", text=text, props=props, parent=parent, **attributes)
-
-    def _make_scope_token(self) -> str:
-        digest = hashlib.blake2s(str(self._file).encode("utf-8"), digest_size=4).digest()
-        return base64.b32encode(digest).decode("ascii").lower().rstrip("=")[:5]
 
 
     async def importPlugin(self, plugin, parent=None):

@@ -1,12 +1,13 @@
 import re
 from pathlib import Path
-from ..sharedClasses.nextyle_nexcript_path_control import NexetyleNexcriptPathControl
+from ..sharedClasses.basePathControl import BasePathControl
+
 
 class CodeTransformer:
-    def __init__(self, code: str, path_control: NexetyleNexcriptPathControl, scope_token: str | None = None):
+    def __init__(self, code: str, path_control: BasePathControl, scope_token: str | None = None):
         self.code = code
         self.pc = path_control
-        self.scope_token = scope_token or path_control.scoping_token
+        self.scope_token = scope_token or path_control.scope_token
 
     def transform(self) -> str:
         code = self._transform_scoping(self.code)
@@ -20,16 +21,25 @@ class CodeTransformer:
             code,
             lambda segment: re.sub(
                 pattern,
-                lambda m: f"document.querySelector('[data-scoping=\"{self.scope_token}\"]')" if not m.group(1) else f"document.querySelector('{m.group(1).strip()}')",
+                lambda m: f"document.querySelector('[data-scoping=\"{self.scope_token}\"]')"
+                          if not m.group(1)
+                          else f"document.querySelector('{m.group(1).strip()}')",
                 segment,
             ),
         )
 
-
-
     def _transform_urls(self, code: str) -> str:
         pattern = r"\burl\s*\(\s*(['\"])([^'\"]+)\1\s*\)"
-        return self._process_non_comment_code(code, lambda segment: re.sub(pattern, lambda m: f"{m.group(1)}{self.pc._url(m.group(2).strip())}{m.group(1)}" if not self._is_absolute_url(m.group(2).strip()) else m.group(0), segment))
+        return self._process_non_comment_code(
+            code,
+            lambda segment: re.sub(
+                pattern,
+                lambda m: f"{m.group(1)}{self.pc.url(m.group(2).strip())}{m.group(1)}"
+                          if not self._is_absolute_url(m.group(2).strip())
+                          else m.group(0),
+                segment,
+            ),
+        )
 
     def _transform_imports_and_exports(self, code: str) -> str:
         patterns = [
@@ -39,14 +49,18 @@ class CodeTransformer:
         ]
         def replacer(segment: str) -> str:
             for pattern in patterns:
-                segment = re.sub(pattern, lambda m: f"{m.group(1)}{self._resolve_module_specifier(m.group(2).strip())}{m.group(3)}", segment)
+                segment = re.sub(
+                    pattern,
+                    lambda m: f"{m.group(1)}{self._resolve_module_specifier(m.group(2).strip())}{m.group(3)}",
+                    segment,
+                )
             return segment
         return self._process_non_comment_code(code, replacer)
 
     def _resolve_module_specifier(self, specifier: str) -> str:
         if self._is_absolute_url(specifier) or not specifier.startswith("."):
             return specifier
-        resolved_url = self.pc._url(specifier)
+        resolved_url = self.pc.url(specifier)
         if not Path(specifier).suffix:
             return f"{resolved_url}.js"
         return resolved_url

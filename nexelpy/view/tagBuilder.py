@@ -26,8 +26,7 @@ class TagBuilder:
             f"{k.replace('Class', 'class').replace('__', '-')}="
             f"'{escape(json.dumps(v, ensure_ascii=False) if isinstance(v, (list, dict)) else str(v), quote=True)}'"
             for k, v in self.attribute.items()) if self.attribute else ""
-
-        vla = self.props
+        
         vla = self.props
         if self.selfClose:
             return f"<{tag}{(' ' + attrs) if attrs else ''}{(' ' + vla) if vla else ''}/>"

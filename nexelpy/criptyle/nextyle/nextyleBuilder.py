@@ -1,17 +1,15 @@
 from __future__ import annotations
-
 import re
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
-
 from .context import CSSContext, ContextManager, FontFaceContextManager
 from .keyframes import KeyframeStep
 from .renderer import CSSRenderer
 from .select import Select
-from ..sharedClasses.nextyle_nexcript_path_control import NexetyleNexcriptPathControl
+from ..sharedClasses import BasePathControl
 
 
-class Nextyle(NexetyleNexcriptPathControl):
+class Nextyle(BasePathControl):
     DEFAULT_MEDIA_QUERIES = {
         "sm": "@media (min-width: 640px)",
         "md": "@media (min-width: 768px)",
@@ -24,7 +22,6 @@ class Nextyle(NexetyleNexcriptPathControl):
 
     def __init__(self, file: str | Path, export_path: Optional[str | Path] = None, layer_order: Optional[Tuple[str, ...]] = None, **custom_media_queries):
         super().__init__(file)
-        self.scope_token = self.scoping_token
         self.export_file = self._resolve_file_path(export_path) if export_path else self.file_path.with_suffix(".css")
         self.media_queries = self.DEFAULT_MEDIA_QUERIES.copy()
         self.media_queries.update(custom_media_queries)
@@ -54,7 +51,7 @@ class Nextyle(NexetyleNexcriptPathControl):
         return " ".join(selectors)
 
     def url(self, path: str, format: Optional[str] = None) -> str:
-        result = f'url("{self._url(path)}")'
+        result = f'url("{super().url(path)}")'
         if format is not None:
             result += f' format("{format}")'
         return result
@@ -64,7 +61,7 @@ class Nextyle(NexetyleNexcriptPathControl):
             original_path = match.group(2).strip()
             if original_path.startswith(("http://", "https://", "data:", "//", "/")):
                 return match.group(0)
-            return f'url("{self._url(original_path)}")'
+            return f'url("{super().url(original_path)}")'
         return self._RAW_URL_PATTERN.sub(replacer, raw_css)
 
     def select(self, selector_name: str) -> Select:
@@ -137,6 +134,8 @@ class Nextyle(NexetyleNexcriptPathControl):
         return self
 
     def __getattr__(self, name: str):
+        if name.startswith("__") and name.endswith("__"):
+            raise AttributeError(name)
         css_property_name = name.replace("_", "-")
 
         def context_declaration(value: Any = None):
@@ -176,5 +175,3 @@ class Nextyle(NexetyleNexcriptPathControl):
         if exc_type is None:
             self.export()
         return False
-
-
