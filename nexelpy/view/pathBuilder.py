@@ -1,6 +1,6 @@
 from pathlib import Path
 from posixpath import normpath
-
+import os
 
 class PathBuilder:
     def __init__(self, file_path, root):
@@ -22,5 +22,9 @@ class PathBuilder:
         standard_path = (path[1:] if is_root_path else "../" * (dots - 1) + path[dots + 1:])
         resolved_path = (self._project_root if is_root_path else self._current_dir) / standard_path
         resolved_path = resolved_path.resolve()
-        resolved_path.relative_to(self._project_root)
+
+        project_root_str = str(self._project_root)
+        resolved_path_str = str(resolved_path)
+        if not resolved_path_str.startswith(project_root_str + os.sep) and resolved_path_str != project_root_str:
+            return ""  # Return empty string for invalid paths
         return resolved_path

@@ -40,3 +40,8 @@ class SessionManager:
             return payload.get("data", {})
         except Exception:
             return {}
+        
+    @classmethod
+    def get_signing_key(cls) -> bytes:
+        """Return the secret key used for HMAC signing."""
+        return cls.get_fernet()._signing_key

@@ -81,8 +81,9 @@ class MainAppBuilder(Starlette):
         if secretKey is None:
             secretKey = Fernet.generate_key()
         SessionManager.initialize(secretKey)
-        self.add_middleware(NexelpySessionMiddleware)
         self.add_middleware(CSRFMiddleware)
+        self.add_middleware(NexelpySessionMiddleware)
+        
         # ---------- 5. static + .nexelpy ----------
         root_dir = Path(self.file).resolve().parent
         (root_dir / ".nexelpy").touch(exist_ok=True)
@@ -149,21 +150,21 @@ class MainAppBuilder(Starlette):
         shutil.copytree(source, self.nexel_venv_path, symlinks=True, dirs_exist_ok=False)
 
     def add_manual_route(self, route: str = "", prefix: str = "",
-                         method: str | Iterable[str] | None = None,
+                         methods: str | Iterable[str] | None = None,
                          func: Callable[..., Any] | None = None) -> Callable[..., Any]:
         if func is None or not callable(func):
             raise TypeError("func must be a callable function")
         is_valid, full_path = UrlChecker.check(route, prefix)
         if not is_valid:
             raise ValueError(full_path)
-        if method is None:
+        if methods is None:
             methods = ["GET"]
-        elif isinstance(method, str):
-            methods = [method.upper()]
+        elif isinstance(methods, str):
+            methods = [methods.upper()]
         else:
-            methods = [item.upper() for item in method]
+            methods = [item.upper() for item in methods]
         route_data = {
-            "path": full_path, "method": methods, "handler": func,
+            "path": full_path, "methods": methods, "handler": func,
             "module": func.__module__, "file": func.__code__.co_filename,
             "line": func.__code__.co_firstlineno, "route": route, "prefix": prefix,
         }

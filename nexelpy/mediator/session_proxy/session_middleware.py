@@ -17,11 +17,11 @@ class NexelpySessionMiddleware:
         if cookie_header:
             cookie = SimpleCookie()
             cookie.load(cookie_header.decode())
-            if "n-session" in cookie:
-                token = cookie["n-session"].value
+            if "session_clientSide" in cookie:
+                token = cookie["session_clientSide"].value
                 session_data = SessionManager.decrypt(token)
 
         scope.setdefault("state", {})
-        scope["state"]["n-session"] = session_data
+        scope["state"]["session_clientSide"] = session_data
 
         await self.app(scope, receive, send)

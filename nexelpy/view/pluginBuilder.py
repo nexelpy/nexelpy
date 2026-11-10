@@ -9,7 +9,7 @@ import hashlib
 # from .quickEvents.quickEventsBuilder import QuickEvents
 
 class PluginBuilder(FormBuilder, CookiesManager):
-    def __init__(self, file=None, nextyles=None,nexcripts=None):
+    def __init__(self, file=None, ):
         super().__init__()
         self._plugin_return_func_data = None
         self.Headers = HeaderBuilder()
@@ -20,9 +20,9 @@ class PluginBuilder(FormBuilder, CookiesManager):
 
         # self.raw("<!doctype html>",parent=self.elementsContainer)
         self.element("!DOCTYPE html", selfClose=True, parent=self.elementsContainer)
-        self.HTML_tag = self.element("html", parent=self.elementsContainer)
-        self.HEAD_tag = self.element("head", parent=self.HTML_tag)
-        self.BODY_tag = self.element("body", parent=self.HTML_tag)
+        self.htmlTag = self.element("html", parent=self.elementsContainer)
+        self.headTag = self.element("head", parent=self.htmlTag)
+        self.bodyTag = self.element("body", parent=self.htmlTag)
        
 
     def scoping(self, text="", props="", parent=None, **attributes):
@@ -37,8 +37,8 @@ class PluginBuilder(FormBuilder, CookiesManager):
     async def importPlugin(self, plugin, parent=None):
         PARENT = self._setParent(parent)
         PLUGIN = await plugin
-        PARENT.children.extend(PLUGIN.BODY_tag.children)
-        self.HEAD_tag.children.extend(PLUGIN.HEAD_tag.children)
+        PARENT.children.extend(PLUGIN.bodyTag.children)
+        self.headTag.children.extend(PLUGIN.headTag.children)
         self._cookies_list.extend(PLUGIN._cookies_list)
         return PLUGIN._plugin_return_func_data[0] if len(PLUGIN._plugin_return_func_data) ==1 else PLUGIN._plugin_return_func_data 
 

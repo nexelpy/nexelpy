@@ -1,6 +1,7 @@
 from starlette.responses import PlainTextResponse
-from urllib.parse import parse_qs
 from .csrfManager import CSRFManager
+from starlette.requests import Request
+import json
 
 
 class CSRFMiddleware:
@@ -11,19 +12,30 @@ class CSRFMiddleware:
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
 
-        # NexelPy only supports GET and POST. Safe methods bypass CSRF.
+        scope.setdefault("state", {})
+        if not scope["state"].get("csrf_enabled", False):
+            return await self.app(scope, receive, send)
+        
+        # 1. Ensure CSRF token exists in scope for the View to use
+        session_data = scope.get("state", {}).get("session_clientSide", {})
+        if "csrf_token" not in scope.get("state", {}):
+            scope.setdefault("state", {})
+            # Initial default binding (None means use whole session)
+            scope["state"]["csrf_binding_key"] = None 
+            scope["state"]["csrf_token"] = CSRFManager.generate_token(session_data)
+            scope["state"]["csrf_max_age"] = 7200
+
+        # Safe methods bypass CSRF check
         if scope["method"] in ("GET", "HEAD", "OPTIONS"):
             return await self.app(scope, receive, send)
 
-        session_data = scope.get("state", {}).get("session_clientSide", {})
         headers = dict(scope.get("headers", []))
-        
-        # 1. Try to get token from Header (AJAX / JSON)
         token = headers.get(b"x-csrf-token", b"").decode()
-        
-        # 2. If no header, try to get from Form Body (Traditional HTML Forms)
+
+        # 2. If no header, extract from Form Body safely
         if not token:
             content_type = headers.get(b"content-type", b"").decode()
+            
             if "application/x-www-form-urlencoded" in content_type:
                 body = b""
                 more_body = True
@@ -32,23 +44,48 @@ class CSRFMiddleware:
                     body += message.get("body", b"")
                     more_body = message.get("more_body", False)
                 
-                # Parse form data
+                scope["cached_body"] = body
+                
+                async def receive():
+                    return {"type": "http.request", "body": body, "more_body": False}
+
+                from urllib.parse import parse_qs
                 try:
                     form_data = parse_qs(body.decode())
                     token = form_data.get("csrf_token", [""])[0]
                 except Exception:
                     pass
+            
+            elif "application/json" in content_type:
+                body = b""
+                more_body = True
+                while more_body:
+                    message = await receive()
+                    body += message.get("body", b"")
+                    more_body = message.get("more_body", False)
+                scope["cached_body"] = body
                 
-                # Re-inject the body so the actual View handler can read it
                 async def receive():
                     return {"type": "http.request", "body": body, "more_body": False}
+                try:
+                    json_data = json.loads(body.decode())
+                    token = json_data.get("csrf_token", "")
+                except Exception:
+                    pass
 
-        # 3. Verify token existence and validity
+        # 3. Verify token
         if not token:
-            return PlainTextResponse("CSRF token missing", status_code=403)
+            response = PlainTextResponse("CSRF token missing", status_code=403)
+            await response(scope, receive, send)
+            return
 
-        if not CSRFManager.verify_token(token, session_data):
-            return PlainTextResponse("CSRF token invalid or expired", status_code=403)
+        max_age = scope.get("state", {}).get("csrf_max_age", 7200)
+        binding_key = scope.get("state", {}).get("csrf_binding_key", None)
+        
+        if not CSRFManager.verify_token(token, session_data, binding_key=binding_key, max_age=max_age):
+            response = PlainTextResponse("CSRF token invalid or expired", status_code=403)
+            await response(scope, receive, send)
+            return
 
         # Token is valid, proceed to the View
         await self.app(scope, receive, send)

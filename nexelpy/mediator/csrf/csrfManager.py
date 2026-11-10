@@ -7,49 +7,53 @@ from ..session_proxy.sessionManager import SessionManager
 
 class CSRFManager:
     @classmethod
-    def generate_token(cls, session_data: dict) -> str:
-        # 1. Create a random nonce and timestamp
+    def _get_binding(cls, session_data: dict, binding_key: str = None) -> str:
+        # 1. If no key is provided, hash the entire session
+        if binding_key is None:
+            if not session_data:
+                return ""
+            sorted_items = sorted(session_data.items())
+            return hashlib.sha256(str(sorted_items).encode()).hexdigest()
+        
+        # 2. If the key exists in the session, use its value
+        if binding_key in session_data:
+            return str(session_data[binding_key])
+        
+        # 3. If it's a random guest ID (not in session), hash it
+        return hashlib.sha256(binding_key.encode()).hexdigest()
+
+    @classmethod
+    def generate_token(cls, session_data: dict, binding_key: str = None) -> str:
         nonce = secrets.token_hex(16)
         timestamp = str(int(time.time()))
+        binding = cls._get_binding(session_data, binding_key)
+        payload = f"{nonce}:{timestamp}:{binding}"
         
-        # 2. Bind the token to the user's session (or empty string for guests)
-        session_binding = str(session_data.get("user_id", "")) if session_data else ""
-        
-        # 3. Create the payload
-        payload = f"{nonce}:{timestamp}:{session_binding}"
-        
-        # 4. Sign with HMAC using the session's secret key
-        secret = SessionManager.get_fernet()._signing_key
+        secret = SessionManager.get_signing_key()
         signature = hmac.new(secret, payload.encode(), hashlib.sha256).hexdigest()
-        
         return f"{payload}.{signature}"
 
     @classmethod
-    def verify_token(cls, token: str, session_data: dict) -> bool:
+    def verify_token(cls, token: str, session_data: dict, binding_key: str = None, max_age: int = 7200) -> bool:
         try:
-            # Split payload and signature
             payload, signature = token.rsplit(".", 1)
             parts = payload.split(":")
             if len(parts) != 3:
                 return False
-                
-            nonce, timestamp, session_binding = parts
             
-            # 1. Verify the session binding (prevents token theft across sessions)
-            current_binding = str(session_data.get("user_id", "")) if session_data else ""
-            if not hmac.compare_digest(session_binding, current_binding):
+            nonce, timestamp, binding = parts
+            current_binding = cls._get_binding(session_data, binding_key)
+            
+            if not hmac.compare_digest(binding, current_binding):
                 return False
                 
-            # 2. Verify the HMAC signature
-            secret = SessionManager.get_fernet()._signing_key
+            secret = SessionManager.get_signing_key()
             expected = hmac.new(secret, payload.encode(), hashlib.sha256).hexdigest()
             if not hmac.compare_digest(signature, expected):
                 return False
                 
-            # 3. Verify the timestamp (expire tokens after 2 hours)
-            if time.time() - int(timestamp) > 7200:
+            if time.time() - int(timestamp) > max_age:
                 return False
-                
             return True
         except Exception:
             return False

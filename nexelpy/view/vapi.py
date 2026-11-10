@@ -12,10 +12,11 @@ class Vapi(PluginBuilder):
         final_data = {
                 **data ,
                 "QE_links_header":self.HEAD_tag.content,
-                "view": self.BODY_tag.content,
+                "view": self.bodyTag.content,
                 "status_message":status_message,
                 }
 
         response = JSONResponse(content=final_data, status_code=status_code , headers=self.Headers.build_header())
         self._setCookiesFromList(response=response)
+        self._set_csrf_cookie_and_header(response)
         return response

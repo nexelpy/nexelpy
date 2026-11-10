@@ -10,7 +10,7 @@ class ElementBuilder():
         if parent is not None:
             return parent
         stack = self._parent_stack
-        return stack[-1] if stack else self.BODY_tag
+        return stack[-1] if stack else self.bodyTag
     
     def raw(self, html, parent=None):
         node = RawHTML(html, parent=self._setParent(parent))

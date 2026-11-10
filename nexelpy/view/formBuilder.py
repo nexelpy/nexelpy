@@ -16,5 +16,5 @@ class FormBuilder(ElementBuilder):
 
     def submit(self, text="", props="", parent=None, **attributes):
         attributes["type"] = "submit"
-        attributes["value"] = f"'{text}'"
+        attributes["value"] = text
         return self.element(tagName="input", selfClose=True, props=props, parent=parent, **attributes) 

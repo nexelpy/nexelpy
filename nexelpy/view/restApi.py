@@ -5,11 +5,14 @@ from starlette.background import BackgroundTask
 from starlette.responses import FileResponse, JSONResponse,PlainTextResponse,StreamingResponse,Response,RedirectResponse
 from typing import AsyncIterable
 from ..mediator.headerBuilder.headerBuilder import HeaderBuilder
-
 from typing import Any,Literal
 from starlette.templating import Jinja2Templates
 
 
+from functools import lru_cache
+@lru_cache(maxsize=128)
+def _get_jinja_templates(directory: str):
+    return Jinja2Templates(directory=directory)
 
 class RestApi(CookiesManager):
     def __init__(self, file=None):
@@ -23,22 +26,12 @@ class RestApi(CookiesManager):
         if file_path is False or not file_path.is_file():
             response = Response(content="File not found",status_code=404,headers=self.Headers.build_header(),)
             self._setCookiesFromList(response=response)
+            self._set_csrf_cookie_and_header(response)
             return response
         response = FileResponse(path=file_path,media_type=media_type,filename=download_name,status_code=status_code,headers=self.Headers.build_header(),
             background=BackgroundTask(background_task) if callable(background_task) else background_task,content_disposition_type=disposition,)
         self._setCookiesFromList(response=response)
-        return response
-
-    def RESPONSE_html(self,html_path: str,background_task=None,status_code: int = 200,**data: Any,):
-        html = self._PathBuilder._resolve_file_path(html_path)
-        if html is False or not html.is_file():
-            response = Response(content="Template not found",status_code=404, headers=self.Headers.build_header(),)
-            self._setCookiesFromList(response=response)
-            return response
-        templates = Jinja2Templates(directory=str(html.parent))
-        response = templates.TemplateResponse(request=self.REQUEST._get_original_request(),name=html.name,context=data,status_code=status_code,
-                    headers=self.Headers.build_header(),background=BackgroundTask(background_task) if callable(background_task) else background_task,)
-        self._setCookiesFromList(response=response)
+        self._set_csrf_cookie_and_header(response)
         return response
 
 
@@ -55,6 +48,7 @@ class RestApi(CookiesManager):
             background=BackgroundTask(background_task) if callable(background_task) else background_task,
         )
         self._setCookiesFromList(response=response)
+        self._set_csrf_cookie_and_header(response)
         return response
 
     def RESPONSE_text(
@@ -70,6 +64,7 @@ class RestApi(CookiesManager):
             background=BackgroundTask(background_task) if callable(background_task) else background_task,
         )
         self._setCookiesFromList(response=response)
+        self._set_csrf_cookie_and_header(response)
         return response
 
     def RESPONSE_streaming(
@@ -87,6 +82,7 @@ class RestApi(CookiesManager):
             background=BackgroundTask(background_task) if callable(background_task) else background_task,
         )
         self._setCookiesFromList(response=response)
+        self._set_csrf_cookie_and_header(response)
         return response
 
     def RESPONSE_no_content(
@@ -99,6 +95,7 @@ class RestApi(CookiesManager):
             background=BackgroundTask(background_task) if callable(background_task) else background_task,
         )
         self._setCookiesFromList(response=response)
+        self._set_csrf_cookie_and_header(response)
         return response
 
     def RESPONSE_redirect(
@@ -114,5 +111,46 @@ class RestApi(CookiesManager):
             background=BackgroundTask(background_task) if callable(background_task) else background_task,
         )
         self._setCookiesFromList(response=response)
+        self._set_csrf_cookie_and_header(response)
+        return response
+    
+    def RESPONSE_html_jinja(self, html_path: str, background_task=None, status_code: int = 200, **data: Any):
+        """Renders an HTML file using the Jinja2 template engine."""
+        html = self._PathBuilder._resolve_file_path(html_path)
+        if not html or not html.is_file():
+            response = Response(content="Template not found", status_code=404, headers=self.Headers.build_header())
+            self._setCookiesFromList(response=response)
+            return response
+        
+        # Use cached templates
+        templates = _get_jinja_templates(str(html.parent))
+        response = templates.TemplateResponse(
+            request=self.REQUEST._get_original_request(), 
+            name=html.name, 
+            context=data, 
+            status_code=status_code,
+            headers=self.Headers.build_header(), 
+            background=BackgroundTask(background_task) if callable(background_task) else background_task
+        )
+        self._setCookiesFromList(response=response)
+        self._set_csrf_cookie_and_header(response)
         return response
 
+    def RESPONSE_html(self, html_path: str, background_task=None, status_code: int = 200):
+        """Returns a raw HTML file directly from disk (Streamed)."""
+        html_file = self._PathBuilder._resolve_file_path(html_path)
+        if not html_file or not html_file.is_file():
+            response = Response(content="File not found", status_code=404, headers=self.Headers.build_header())
+            self._setCookiesFromList(response=response)
+            return response
+
+        response = FileResponse(
+            path=html_file,
+            media_type="text/html",
+            status_code=status_code,
+            headers=self.Headers.build_header(),
+            background=BackgroundTask(background_task) if callable(background_task) else background_task
+        )
+        self._setCookiesFromList(response=response)
+        self._set_csrf_cookie_and_header(response)
+        return response
