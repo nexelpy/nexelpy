@@ -26,12 +26,10 @@ class RestApi(CookiesManager):
         if not file_path.is_file():
             response = Response(content="File not found",status_code=404,headers=self.Headers.build_header(),)
             self._setCookiesFromList(response=response)
-            self._set_csrf_clientSide_cookie_and_header(response)
             return response
         response = FileResponse(path=file_path,media_type=media_type,filename=download_name,status_code=status_code,headers=self.Headers.build_header(),
             background=BackgroundTask(background_task) if callable(background_task) else background_task,content_disposition_type=disposition,)
         self._setCookiesFromList(response=response)
-        self._set_csrf_clientSide_cookie_and_header(response)
         return response
 
 
@@ -48,7 +46,6 @@ class RestApi(CookiesManager):
             background=BackgroundTask(background_task) if callable(background_task) else background_task,
         )
         self._setCookiesFromList(response=response)
-        self._set_csrf_clientSide_cookie_and_header(response)
         return response
 
     def RESPONSE_text(
@@ -64,7 +61,6 @@ class RestApi(CookiesManager):
             background=BackgroundTask(background_task) if callable(background_task) else background_task,
         )
         self._setCookiesFromList(response=response)
-        self._set_csrf_clientSide_cookie_and_header(response)
         return response
 
     def RESPONSE_streaming(
@@ -82,7 +78,6 @@ class RestApi(CookiesManager):
             background=BackgroundTask(background_task) if callable(background_task) else background_task,
         )
         self._setCookiesFromList(response=response)
-        self._set_csrf_clientSide_cookie_and_header(response)
         return response
 
     def RESPONSE_no_content(
@@ -95,7 +90,6 @@ class RestApi(CookiesManager):
             background=BackgroundTask(background_task) if callable(background_task) else background_task,
         )
         self._setCookiesFromList(response=response)
-        self._set_csrf_clientSide_cookie_and_header(response)
         return response
 
     def RESPONSE_redirect(
@@ -111,7 +105,6 @@ class RestApi(CookiesManager):
             background=BackgroundTask(background_task) if callable(background_task) else background_task,
         )
         self._setCookiesFromList(response=response)
-        self._set_csrf_clientSide_cookie_and_header(response)
         return response
     
     def RESPONSE_html_jinja(self, html_path: str, background_task=None, status_code: int = 200, **data: Any):
@@ -133,7 +126,6 @@ class RestApi(CookiesManager):
             background=BackgroundTask(background_task) if callable(background_task) else background_task
         )
         self._setCookiesFromList(response=response)
-        self._set_csrf_clientSide_cookie_and_header(response)
         return response
 
     def RESPONSE_html(self, html_path: str, background_task=None, status_code: int = 200):
@@ -152,5 +144,4 @@ class RestApi(CookiesManager):
             background=BackgroundTask(background_task) if callable(background_task) else background_task
         )
         self._setCookiesFromList(response=response)
-        self._set_csrf_clientSide_cookie_and_header(response)
         return response

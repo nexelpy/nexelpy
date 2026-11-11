@@ -18,5 +18,4 @@ class Vapi(PluginBuilder):
 
         response = JSONResponse(content=final_data, status_code=status_code , headers=self.Headers.build_header())
         self._setCookiesFromList(response=response)
-        self._set_csrf_clientSide_cookie_and_header(response)
         return response

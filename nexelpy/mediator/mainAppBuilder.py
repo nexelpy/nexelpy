@@ -14,6 +14,7 @@ from .mainAppHelper import (
     setup_middlewares,
     setup_statics,
     run_app,
+    resolve_secret_key
 )
 
 
@@ -30,7 +31,7 @@ class MainAppBuilder(Starlette):
         self.Middleware_modules: list[str] = []
         self.manual_routes: list[dict] = []
         self.ignore_watch_dirs = ignore_watch_dirs or []
-        self.nexel_venv_path = Path(self.root_Path) / "nexel_venv"
+        self.secretKey = resolve_secret_key(secretKey)
 
         # ---------- 2. Node.js info ----------
         info = RuntimeInfo()

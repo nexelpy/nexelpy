@@ -27,7 +27,7 @@ def run_app(app, host: str = "127.0.0.1", port: int = 8000) -> None:
         return
 
     # Child / prod
-    console.print("=" * 80)
+    
     console.print(
         f"[bold][NexelPy MainApp][/bold] [blue]registered manual routes:[/blue] "
         f"{len(app.manual_routes)}"
@@ -36,5 +36,7 @@ def run_app(app, host: str = "127.0.0.1", port: int = 8000) -> None:
         f"[bold][NexelPy Registration][/bold] [green]registered routes: "
         f"{len(app.AutoRegister_list) + len(app.manual_routes)}[/green]"
     )
+    # console.print("=" * 40)
     logging.getLogger("uvicorn.access").addFilter(UvicornAccessFilter())
     uvicorn.run(app, host=host, port=port)
+    

@@ -28,6 +28,7 @@ class RegistrationBuilder:
                 "middleware_modules": [...],
             }
         """
+        console.print("=" * 80)
         scanner = ModuleScanner(self._file)
         self._scanned_modules = scanner.run()
         console.print(

@@ -17,5 +17,4 @@ class PageBilder(PluginBuilder):
         HeadTagAnalyzer(self.headTag).analyze()
         response = HTMLResponse(content=self.elementsContainer.content,status_code=200,headers=self.Headers.build_header(),media_type="text/html")
         self._setCookiesFromList(response=response)
-        self._set_csrf_clientSide_cookie_and_header(response)
         return response

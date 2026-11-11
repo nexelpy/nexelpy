@@ -7,7 +7,7 @@ from .routes import (
 from .middlewares import setup_middlewares
 from .statics import setup_statics, nexelStaticFiles
 from .runner import run_app, UvicornAccessFilter
-
+from .secretKey import resolve_secret_key
 __all__ = [
     "print_branding",
     "setup_routes",

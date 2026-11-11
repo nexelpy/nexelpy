@@ -1,5 +1,5 @@
 from starlette.requests import Request as R
-from typing import Any, Optional
+from typing import  Optional
 from starlette.datastructures import URL, QueryParams, Headers, Address
 from .request_object import get_request
 
@@ -84,11 +84,6 @@ class RequestProxy:
     def stream(self):
         """Return the raw async generator. Use: async for chunk in x.Request.stream(): ..."""
         return self._get_original_request().stream()
-
-    async def session_clientSide(self, *keys):
-        request = self._get_original_request()
-        session_data = request.scope.get("state", {}).get("session_clientSide", {})
-        return self._pick(session_data, *keys)
 
     async def payload(self, method, *keys):
         method = method.upper()

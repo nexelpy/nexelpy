@@ -203,9 +203,6 @@ class Reloader:
 
     def run(self) -> None:
 
-        if DEBUG:
-            console.print(f"[dim]debug log -> {_LOG_PATH}[/dim]")
-
         self._child = self._spawn_child()
         dlog(f"run: initial child pid={self._child.pid} — waiting for ready")
 
