@@ -98,7 +98,7 @@ class CookiesManager:
         try:
             request = get_request()
             request.scope.setdefault("state", {})
-            request.scope["state"]["n-session"] = dict(data)
+            request.scope["state"]["session_clientSide"] = dict(data)
         except RuntimeError:
             pass
 
@@ -109,13 +109,13 @@ class CookiesManager:
         self._cookies_list.clear()
 
 
-    def _set_csrf_cookie_and_header(self, response) -> None:
+    def _set_csrf_clientSide_cookie_and_header(self, response) -> None:
         request = get_request()
         
         # 1. Set guest ID cookie if generated
-        guest_id = request.scope.get("state", {}).get("csrf_guest_id")
-        guest_key = request.scope.get("state", {}).get("csrf_guest_key")
-        max_age = request.scope.get("state", {}).get("csrf_max_age", 7200)
+        guest_id = request.scope.get("state", {}).get("csrf_clientSide_guest_id")
+        guest_key = request.scope.get("state", {}).get("csrf_clientSide_guest_key")
+        max_age = request.scope.get("state", {}).get("csrf_clientSide_max_age", 7200)
         
         if guest_id and guest_key:
             response.set_cookie(
@@ -129,13 +129,13 @@ class CookiesManager:
             )
 
         # 2. Set CSRF token (Header & Cookie)
-        token = request.scope.get("state", {}).get("csrf_token", "")
+        token = request.scope.get("state", {}).get("csrf_clientSide", "")
         if not token:
             return
 
-        response.headers["X-CSRF-Token"] = token
+        response.headers["X-CSRF-ClientSide"] = token
         response.set_cookie(
-            key="csrf_token",
+            key="csrf_clientSide",
             value=token,
             max_age=max_age,
             path="/",
@@ -147,11 +147,11 @@ class CookiesManager:
 
 
 
-    def set_csrf(self, max_age: int = 7200, binding_key: str = None) -> str:
+    def set_csrf_clientSide(self, max_age: int = 7200, binding_key: str = None) -> str:
         req = get_request()
         req.scope.setdefault("state", {})
-        req.scope["state"]["csrf_enabled"] = True
-        req.scope["state"]["csrf_max_age"] = max_age
+        req.scope["state"]["csrf_clientSide_enabled"] = True
+        req.scope["state"]["csrf_clientSide_max_age"] = max_age
         
         session_data = req.scope.get("state", {}).get("session_clientSide", {})
         actual_binding = binding_key
@@ -181,6 +181,31 @@ class CookiesManager:
         # Generate/regenerate the token
         new_token = CSRFManager.generate_token(session_data, actual_binding)
         req.scope["state"]["csrf_token"] = new_token
-        req.scope["state"]["csrf_binding_key"] = actual_binding
+        req.scope["state"]["csrf_clientSide_binding_key"] = actual_binding
         
         return new_token
+
+    def delete_session_clientSide(self, *keys: str) -> None:
+        """
+        Delete session keys (or the whole session if no keys given).
+        """
+        req = get_request()
+        scope_state = req.scope.setdefault("state", {})
+        current = scope_state.get("session_clientSide", {})
+
+        if keys:
+            # Delete specific keys
+            new_data = {k: v for k, v in current.items() if k not in keys}
+        else:
+            # Delete all
+            new_data = {}
+
+        # Update scope immediately
+        scope_state["session_clientSide"] = new_data
+
+        if not new_data:
+            # Full session removal: delete cookie
+            self.delete_Cookie("session_clientSide")
+        else:
+            # Re-encrypt remaining data and set cookie
+            self.set_session_clientSide(**new_data)

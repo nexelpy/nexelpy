@@ -8,5 +8,5 @@ from .mediator.mainAppBuilder import MainAppBuilder as Nexelpy
 from .criptyle.nextyle.nextyleBuilder import Nextyle
 from .criptyle.nexcript.nexcriptBuilder import Nexcript
 from .view.htmlBuilder import HTMLBuilder
-
+from .mediator.middleware_builder import Middleware
 

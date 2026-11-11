@@ -15,7 +15,8 @@ class PluginBuilder(FormBuilder, CookiesManager):
         self._file = file
         self._root_path = self.REQUEST._get_original_request().app.root_Path
         self._PathBuilder = PathBuilder(file_path=file, root=self._root_path)
-        self._scope_token = _make_scope_token(file)
+        self.scoping_token = _make_scope_token(file)
+        self.scoping_selector = f'[data-scoping="{self.scoping_token}"]'
 
         # self.raw("<!doctype html>",parent=self.elementsContainer)
         self.element("!DOCTYPE html", selfClose=True, parent=self.elementsContainer)
@@ -25,7 +26,7 @@ class PluginBuilder(FormBuilder, CookiesManager):
        
 
     def scoping(self, text="", props="", parent=None, **attributes):
-        attributes["data-scoping"] = self._scope_token
+        attributes["data-scoping"] = self.scoping_token
         return self.element(tagName="div", text=text, props=props, parent=parent, **attributes)
 
 

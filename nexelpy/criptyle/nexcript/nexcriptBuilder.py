@@ -1,5 +1,4 @@
 import inspect
-import os
 import subprocess
 from pathlib import Path
 from ..sharedClasses import BasePathControl
@@ -12,7 +11,6 @@ class Nexcript(BasePathControl):
     def __init__(self, file: str | Path, export_path: str | Path | None = None):
         super().__init__(file)
         self._info = RuntimeInfo()
-        self._node_exe = self._resolve_node_binary() if self._info.has_node else None
         self._export_file = self._resolve_export_path(export_path)
         self._code_list: list[dict[str, str]] = []
         self.src = f"/{self._export_file.relative_to(self.project_root).as_posix()}"
@@ -26,10 +24,6 @@ class Nexcript(BasePathControl):
         return False
 
     def raw_script(self, code: str, lang: str | None = None):
-        """
-        Add a script block.
-        If lang is None, it will be auto-detected (ts or js).
-        """
         code = inspect.cleandoc(code)
         if lang is None:
             lang = "ts" if is_typescript(code) else "js"
@@ -40,17 +34,6 @@ class Nexcript(BasePathControl):
         if export_path is None:
             return (self.current_dir / f"{self.file_path.stem}.js").resolve()
         return self._resolve_file_path(export_path)
-
-    def _resolve_node_binary(self) -> str:
-        # 1. Try isolated Node.js in criptyle/nodjs/
-        nodjs_dir = Path(__file__).resolve().parent.parent / "nodjs"
-        if nodjs_dir.exists():
-            pattern = "**/node.exe" if os.name == "nt" else "**/bin/node"
-            candidates = sorted(nodjs_dir.glob(pattern))
-            if candidates:
-                return str(candidates[0])
-        # 2. Fallback to system node
-        return "node"
 
     def _transpile_ts(self, ts_code: str) -> str:
         if not self._info.can_transpile_ts:
@@ -68,7 +51,7 @@ class Nexcript(BasePathControl):
         try:
             proc = subprocess.run(
                 [
-                    self._node_exe,
+                    "node",
                     "--experimental-strip-types",
                     "-e",
                     f"console.log(require('module').stripTypeScriptTypes({ts_code!r}))",

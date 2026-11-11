@@ -13,24 +13,24 @@ class CSRFMiddleware:
             return await self.app(scope, receive, send)
 
         scope.setdefault("state", {})
-        if not scope["state"].get("csrf_enabled", False):
+        if not scope["state"].get("csrf_clientSide_enabled", False):
             return await self.app(scope, receive, send)
         
         # 1. Ensure CSRF token exists in scope for the View to use
         session_data = scope.get("state", {}).get("session_clientSide", {})
-        if "csrf_token" not in scope.get("state", {}):
+        if "csrf_clientSide_token" not in scope.get("state", {}):
             scope.setdefault("state", {})
             # Initial default binding (None means use whole session)
-            scope["state"]["csrf_binding_key"] = None 
-            scope["state"]["csrf_token"] = CSRFManager.generate_token(session_data)
-            scope["state"]["csrf_max_age"] = 7200
+            scope["state"]["csrf_clientSide_binding_key"] = None 
+            scope["state"]["csrf_clientSide_token"] = CSRFManager.generate_token(session_data)
+            scope["state"]["csrf_clientSide_max_age"] = 7200
 
         # Safe methods bypass CSRF check
         if scope["method"] in ("GET", "HEAD", "OPTIONS"):
             return await self.app(scope, receive, send)
 
         headers = dict(scope.get("headers", []))
-        token = headers.get(b"x-csrf-token", b"").decode()
+        token = headers.get(b"x-csrf-clientside", b"").decode()
 
         # 2. If no header, extract from Form Body safely
         if not token:
@@ -52,7 +52,7 @@ class CSRFMiddleware:
                 from urllib.parse import parse_qs
                 try:
                     form_data = parse_qs(body.decode())
-                    token = form_data.get("csrf_token", [""])[0]
+                    token = form_data.get("csrf_clientSide_token", [""])[0]
                 except Exception:
                     pass
             
