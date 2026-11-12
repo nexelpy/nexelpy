@@ -1,8 +1,5 @@
 
-```markdown
-<div align="center">
-
-# 🐍 NexelPy
+#  NexelPy
 
 ### A full web app. One language. HTML, CSS, JavaScript, Database — all in Python.
 
