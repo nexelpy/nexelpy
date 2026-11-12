@@ -7,7 +7,7 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, Optional, Sequence
-
+import uuid
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
@@ -114,7 +114,11 @@ class Reloader:
         return os.getenv(cls.CHILD_ENV_KEY) == "1"
 
     def _should_include(self, path: Path) -> bool:
-        return path.suffix.lower() in self.exts
+        if path.suffix.lower() not in self.exts:
+            return False
+        parts = path.parts
+        ignored = set(self.ignore_dirs) | set(getattr(self, "extra_ignore_dirs", ()) or ())
+        return not any(part in ignored for part in parts)
 
     def _iter_files(self) -> Iterable[Path]:
         for root, dirs, files in os.walk(self.watch_dir, followlinks=False):
@@ -146,7 +150,7 @@ class Reloader:
 
     def _make_ready_path(self) -> Path:
         return Path(tempfile.gettempdir()) / (
-            f"nexelpy_ready_{os.getpid()}_{int(time.time() * 1000)}"
+            f"nexelpy_ready_{os.getpid()}_{uuid.uuid4().hex}"
         )
 
     def _spawn_child(self) -> subprocess.Popen:

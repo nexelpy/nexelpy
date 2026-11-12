@@ -57,11 +57,13 @@ class Nextyle(BasePathControl):
         return result
 
     def _resolve_raw_urls(self, raw_css: str) -> str:
+        base_url = super().url
+
         def replacer(match: re.Match) -> str:
             original_path = match.group(2).strip()
             if original_path.startswith(("http://", "https://", "data:", "//", "/")):
                 return match.group(0)
-            return f'url("{super().url(original_path)}")'
+            return f'url("{base_url(original_path)}")'
         return self._RAW_URL_PATTERN.sub(replacer, raw_css)
 
     def select(self, selector_name: str) -> Select:

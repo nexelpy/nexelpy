@@ -30,14 +30,16 @@ class PluginBuilder(FormBuilder, CookiesManager):
         return self.element(tagName="div", text=text, props=props, parent=parent, **attributes)
 
 
-    async def importPlugin(self, plugin, parent=None):
+    def importPlugin(self, plugin, parent=None):
         PARENT = self._setParent(parent)
-        PLUGIN = await plugin
+        PLUGIN = plugin
         PARENT.children.extend(PLUGIN.bodyTag.children)
         self.headTag.children.extend(PLUGIN.headTag.children)
         self._cookies_list.extend(PLUGIN._cookies_list)
-        return PLUGIN._plugin_return_func_data[0] if len(PLUGIN._plugin_return_func_data) ==1 else PLUGIN._plugin_return_func_data 
-
+        if len(PLUGIN._plugin_return_func_data) == 1:
+            return PLUGIN._plugin_return_func_data[0]
+        return PLUGIN._plugin_return_func_data
+    
     def url(self,url):
         return self._PathBuilder.url(url=url)
     
