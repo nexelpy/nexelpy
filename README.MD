@@ -1,8 +1,8 @@
 
-```markdown
-<div align="center">
 
-# 🐍 NexelPy
+
+
+#  NexelPy
 
 ### A full web app. One language. HTML, CSS, JavaScript, Database — all in Python.
 
@@ -12,7 +12,7 @@
 [![Starlette](https://img.shields.io/badge/Built%20on-Starlette-purple.svg)](https://starlette.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 
-</div>
+
 
 ---
 
