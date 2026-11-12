@@ -382,6 +382,7 @@ Share your plugins with others. Your code can be a tiny card, a full page, or an
 
 [💬 GitHub Discussions](https://github.com/nexelpy/nexelpy/discussions)
 
+[![CI](https://github.com/nexelpy/nexelpy/actions/workflows/ci.yml/badge.svg)](https://github.com/nexelpy/nexelpy/actions/workflows/ci.yml)
 ---
 
 ## 📄 License
