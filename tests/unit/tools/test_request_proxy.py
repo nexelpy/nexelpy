@@ -102,3 +102,25 @@ async def test_payload_dispatch(proxy):
 def test_stream_returns_async_iterator(proxy):
     s = proxy.stream()
     assert hasattr(s, "__aiter__")
+
+def test_scope_property(proxy):
+    scope = proxy._scope
+    assert isinstance(scope, dict)
+    assert scope["path"] == "/u/42"
+
+
+@pytest.mark.asyncio
+async def test_client_returns_address_or_none(proxy):
+    client = await proxy.client()
+    assert client is None or hasattr(client, "host")
+
+
+@pytest.mark.asyncio
+async def test_cookies(proxy):
+    result = await proxy.cookies()
+    assert isinstance(result, dict)
+
+
+@pytest.mark.asyncio
+async def test_cookies_specific_key(proxy):
+    assert await proxy.cookies("nonexistent") is None

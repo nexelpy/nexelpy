@@ -152,3 +152,28 @@ def test_add_manual_route_records_metadata():
         assert data["module"] == handler.__module__
         assert "line" in data
         assert "file" in data
+
+
+
+def test_registration_builder_get_routes_and_find(tmp_path):
+    from nexelpy.mediator.registerations.regestrationBuilder import RegistrationBuilder
+
+    main = tmp_path / "main.py"
+    main.touch()
+
+    with patch("nexelpy.mediator.registerations.regestrationBuilder.ModuleScanner") as mock_scanner, \
+         patch("nexelpy.mediator.registerations.regestrationBuilder.ModuleInspector") as mock_inspector, \
+         patch("nexelpy.mediator.registerations.regestrationBuilder.ModuleRunHasDecorator"):
+        mock_scanner.return_value.run.return_value = ["a"]
+        mock_inspector.return_value.run.return_value = {
+            "route_modules": [],
+            "middleware_modules": [],
+        }
+
+        builder = RegistrationBuilder(str(main))
+        builder.run()
+
+        assert builder.get_routes() == []
+
+        # find for non-existent path
+        assert builder.get_route_by_path("/nope") is None

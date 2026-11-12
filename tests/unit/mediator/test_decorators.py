@@ -1,6 +1,7 @@
 import pytest
 from nexelpy.mediator.registerations.decorators import Route, registry
 from nexelpy.mediator.registerations.registry import RouteRegistry
+from unittest.mock import patch
 
 @pytest.fixture(autouse=True)
 def clear_registry():
@@ -68,3 +69,16 @@ def test_route_duplicate_error(capsys):
     assert exc_info.value.code == 1
     captured = capsys.readouterr()
     assert "Duplicate route detected" in captured.out
+
+def test_route_when_getsourcelines_fails():
+    RouteRegistry().clear()
+
+    with patch("nexelpy.mediator.registerations.decorators.inspect.getsourcelines", side_effect=OSError("no source")):
+        @Route("/no-source")
+        async def handler():
+            pass
+
+    routes = RouteRegistry().get_all()
+    assert len(routes) == 1
+    assert routes[0]["path"] == "/no-source"
+    assert routes[0]["line"] is None

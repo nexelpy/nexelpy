@@ -166,3 +166,14 @@ def test_mount_statics_false(tmp_path, monkeypatch):
                     )
                     args, kwargs = mock_static.call_args
                     assert kwargs.get("mount_statics", args[2] if len(args) > 2 else None) is False
+
+
+def test_branding_printed_in_parent_mode(tmp_path, monkeypatch):
+    monkeypatch.setattr("sys.argv", ["/tmp/main.py"])
+
+    with patch("nexelpy.mediator.mainAppBuilder.print_branding") as mock_branding:
+        with patch("nexelpy.mediator.mainAppBuilder.Reloader") as mock_reloader_cls:
+            mock_reloader_cls.is_child.return_value = False
+            with patch.object(MainAppBuilder, "_signal_ready"):
+                MainAppBuilder(file=str(tmp_path / "main.py"))
+                mock_branding.assert_called_once()

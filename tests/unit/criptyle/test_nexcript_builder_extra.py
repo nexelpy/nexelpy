@@ -118,3 +118,67 @@ def test_render_joins_blocks(project, tmp_path):
     content = (tmp_path / "script.js").read_text()
     assert "const a = 1;" in content
     assert "const b = 2;" in content
+
+def test_transpile_ts_called_process_error(project, monkeypatch):
+    import subprocess
+    from nexelpy.criptyle.nexcript.runtime_info import RuntimeInfo
+    from nexelpy.criptyle.nexcript.nexcriptBuilder import Nexcript as N
+    from unittest.mock import MagicMock
+
+    RuntimeInfo._instance = None
+    monkeypatch.setattr("shutil.which", lambda _: "/usr/bin/node")
+
+    calls = {"n": 0}
+    def fake_run(*a, **k):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return MagicMock(stdout="v22.10.0\n")
+        raise subprocess.CalledProcessError(1, "node", stderr="ts error")
+
+    monkeypatch.setattr("subprocess.run", fake_run)
+
+    n = Nexcript(project)
+    with pytest.raises(RuntimeError, match="TypeScript compilation failed: ts error"):
+        n._transpile_ts("let x: number = 1;")
+
+
+def test_transpile_ts_generic_exception(project, monkeypatch):
+    from nexelpy.criptyle.nexcript.runtime_info import RuntimeInfo
+    from unittest.mock import MagicMock
+
+    RuntimeInfo._instance = None
+    monkeypatch.setattr("shutil.which", lambda _: "/usr/bin/node")
+
+    calls = {"n": 0}
+    def fake_run(*a, **k):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return MagicMock(stdout="v22.10.0\n")
+        raise OSError("unexpected")
+
+    monkeypatch.setattr("subprocess.run", fake_run)
+
+    n = Nexcript(project)
+    with pytest.raises(RuntimeError, match="TypeScript compilation failed"):
+        n._transpile_ts("let x: number = 1;")
+
+
+def test_transpile_ts_success(project, monkeypatch):
+    from nexelpy.criptyle.nexcript.runtime_info import RuntimeInfo
+    from unittest.mock import MagicMock
+
+    RuntimeInfo._instance = None
+    monkeypatch.setattr("shutil.which", lambda _: "/usr/bin/node")
+
+    calls = {"n": 0}
+    def fake_run(*a, **k):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return MagicMock(stdout="v22.10.0\n")
+        return MagicMock(stdout="let x = 1;\n")
+
+    monkeypatch.setattr("subprocess.run", fake_run)
+
+    n = Nexcript(project)
+    result = n._transpile_ts("let x: number = 1;")
+    assert result == "let x = 1;"
