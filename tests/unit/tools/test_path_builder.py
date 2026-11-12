@@ -30,3 +30,30 @@ def test_path_security_traversal(tmp_path):
     
     # It should return "/" (invalid path)
     assert result == Path("/")
+
+
+
+def test_plain_relative_without_dot(tmp_path):
+    (tmp_path / "hello.txt").write_text("x")
+    pb = PathBuilder(tmp_path / "main.py", tmp_path)
+    assert pb._resolve_file_path("hello.txt") == tmp_path / "hello.txt"
+
+
+def test_dot_relative_unchanged(tmp_path):
+    (tmp_path / "f.txt").write_text("x")
+    pb = PathBuilder(tmp_path / "main.py", tmp_path)
+    assert pb._resolve_file_path("./f.txt") == tmp_path / "f.txt"
+
+
+def test_dotdot_up_one_level(tmp_path):
+    sub = tmp_path / "sub"
+    sub.mkdir()
+    (tmp_path / "f.txt").write_text("x")
+    pb = PathBuilder(sub / "main.py", tmp_path)
+    assert pb._resolve_file_path("../f.txt") == tmp_path / "f.txt"
+
+
+def test_dotdot_escapes_project_root_blocked(tmp_path):
+    pb = PathBuilder(tmp_path / "main.py", tmp_path)
+    assert pb._resolve_file_path("../outside.txt") == Path("/")
+

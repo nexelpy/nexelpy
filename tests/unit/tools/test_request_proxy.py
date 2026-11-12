@@ -1,72 +1,104 @@
 import pytest
 from nexelpy.mediator.request_proxy.requestProxy import RequestProxy
-from nexelpy.mediator.request_proxy.request_object import set_request, reset_request
+from nexelpy.mediator.request_proxy.request_object import (
+    set_request, reset_request, get_request,
+)
+from nexelpy.mediator.request_proxy import request_object
 from starlette.requests import Request
-from starlette.datastructures import URL, Headers
+from starlette.datastructures import Headers
+
 
 @pytest.fixture
-def mock_proxy():
+def proxy():
     scope = {
         "type": "http",
         "method": "POST",
-        "path": "/test/42",
+        "path": "/u/42",
         "path_params": {"id": "42"},
-        "query_string": b"name=ali&age=25",
-        "headers": [
-            (b"content-type", b"application/x-www-form-urlencoded"),
-            (b"user-agent", b"pytest")
-        ],
+        "query_string": b"a=1&b=2",
+        "headers": [(b"x-test", b"v")],
         "server": ("testserver", 80),
-        "scheme": "http",            
-        "app": None
+        "scheme": "http",
+        "app": None,
+        "cached_body": b"k=v&z=w",
     }
-    
-    async def receive():
-        return {"type": "http.request", "body": b"username=admin&password=123", "more_body": False}
-        
-    req = Request(scope, receive)
+    req = Request(scope)
     token = set_request(req)
-    
-    proxy = RequestProxy()
-    yield proxy
-    reset_request(token)
+    try:
+        yield RequestProxy()
+    finally:
+        reset_request(token)
+
+
+def test_get_request_without_context_raises():
+    request_object._request_var.set(None)
+    with pytest.raises(RuntimeError, match="not initialized"):
+        get_request()
+
 
 @pytest.mark.asyncio
-async def test_proxy_method_and_url(mock_proxy):
-    assert await mock_proxy.method() == "POST"
-    url = await mock_proxy.url()
-    assert isinstance(url, URL)
-    assert str(url) == "http://testserver/test/42?name=ali&age=25"
+async def test_method_and_url(proxy):
+    assert await proxy.method() == "POST"
+    assert str(await proxy.url()) == "http://testserver/u/42?a=1&b=2"
+
 
 @pytest.mark.asyncio
-async def test_proxy_args(mock_proxy):
-    args = await mock_proxy.args()
-    assert args["name"] == "ali"
-    assert await mock_proxy.args("age") == "25"
+async def test_args_single_and_multi(proxy):
+    assert await proxy.args("a") == "1"
+    assert await proxy.args("a", "b") == ["1", "2"]
+    assert isinstance(await proxy.args(), dict)
+
 
 @pytest.mark.asyncio
-async def test_proxy_path_params(mock_proxy):
-    assert await mock_proxy.path_params("id") == "42"
+async def test_path_params(proxy):
+    assert await proxy.path_params("id") == "42"
+
 
 @pytest.mark.asyncio
-async def test_proxy_form(mock_proxy):
-    form = await mock_proxy.form()
-    assert form["username"] == "admin"
-    assert await mock_proxy.form("password") == "123"
+async def test_headers(proxy):
+    h = await proxy.headers()
+    assert isinstance(h, Headers)
+    assert await proxy.headers("x-test") == "v"
+
 
 @pytest.mark.asyncio
-async def test_proxy_headers(mock_proxy):
-    headers = await mock_proxy.headers()
-    assert isinstance(headers, Headers)
-    assert await mock_proxy.headers("user-agent") == "pytest"
+async def test_form(proxy):
+    assert await proxy.form("k") == "v"
+    assert await proxy.form() == {"k": "v", "z": "w"}
+
 
 @pytest.mark.asyncio
-async def test_proxy_app(mock_proxy):
-    app = await mock_proxy.app()
-    assert app is None
+async def test_app(proxy):
+    assert await proxy.app() is None
+
 
 @pytest.mark.asyncio
-async def test_proxy_set_state(mock_proxy):
-    mock_proxy.set_state(custom_key="custom_value")
-    req = mock_proxy._get_original_request()
-    assert req.state.custom_key == "custom_value"
+async def test_scope_getters(proxy):
+    assert await proxy.scope("path") == "/u/42"
+
+
+def test_set_state(proxy):
+    proxy.set_state(a=1, b=2)
+    req = proxy._get_original_request()
+    assert req.state.a == 1
+    assert req.state.b == 2
+
+
+@pytest.mark.asyncio
+async def test_state_roundtrip(proxy):
+    proxy.set_state(x=9)
+    assert await proxy.state("x") == 9
+
+
+@pytest.mark.asyncio
+async def test_payload_dispatch(proxy):
+    assert await proxy.payload("GET", "a") == "1"
+    assert await proxy.payload("PATH", "id") == "42"
+    assert await proxy.payload("POST", "k") == "v"
+    with pytest.raises(ValueError, match="unsupported payload method"):
+        await proxy.payload("NOPE")
+
+
+def test_stream_returns_async_iterator(proxy):
+    s = proxy.stream()
+    assert hasattr(s, "__aiter__")
