@@ -32,8 +32,9 @@ jobs:
             --cov-report=lcov:coverage/lcov.info
 
       - name: Test Report
-        uses: mridang/action-test-reporter@v1
+        uses: dorny/test-reporter@v2
         with:
-          results-path: "report.xml"
-          coverage-path: "coverage/lcov.info"
+          name: Pytest Results
+          path: "report.xml"
+          reporter: python-xunit
         if: always()
