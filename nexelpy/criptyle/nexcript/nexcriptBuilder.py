@@ -23,7 +23,7 @@ class Nexcript(BasePathControl):
             self._export()
         return False
 
-    def raw_script(self, code: str, lang: str | None = None):
+    def add_script(self, code: str, lang: str | None = None):
         code = inspect.cleandoc(code)
         if lang is None:
             lang = "ts" if is_typescript(code) else "js"

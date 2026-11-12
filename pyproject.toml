@@ -1,18 +1,39 @@
 [project]
 name = "nexelpy"
 version = "1.14.30"
-description = "comingsoon"
+description = "Modern Python web framework with Pythonic CSS/JS generation. One language, one file."
 readme = "README.md"
 requires-python = ">=3.8"
 authors = [
     {name = "NexeLinstance", email = "nexelinstance@gmail.com"},
+]
+keywords = ["web", "framework", "starlette", "pythonic", "css", "javascript", "fullstack", "nexelpy"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Starlette",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
 ]
 dependencies = [
     "starlette>=0.27",
     "uvicorn>=0.23",
     "cryptography>=39.0",
     "rich>=13.0",
+    "piccolo>=1.0",
 ]
+
+[project.urls]
+Homepage = "https://nexelpy.net"
+Repository = "https://github.com/Nexelpy/nexelpy"
+Issues = "https://github.com/Nexelpy/nexelpy/issues"
+Documentation = "https://nexelpy.net/docs"
 
 [build-system]
 requires = ["setuptools>=61.0"]
@@ -24,10 +45,16 @@ include-package-data = true
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["nexelpy*"]
-namespaces = true
+exclude = ["tests*", "docs*", "__pycache__*"]
 
 [tool.setuptools.package-data]
-"*" = ["*"]
+"*" = [
+    "*.pyi",
+    "*.html",
+    "*.css",
+    "*.js",
+    "*.md",
+]
 
 [tool.setuptools.exclude-package-data]
 "*" = [
@@ -35,7 +62,8 @@ namespaces = true
     "*.zip",
     "*.pyc",
     "__pycache__/*",
-    "*.swp"
+    "*.swp",
+    "*.log",
+    ".env",
+    ".gitignore"
 ]
-
-

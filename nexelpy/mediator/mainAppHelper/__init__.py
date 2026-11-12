@@ -16,7 +16,6 @@ __all__ = [
     "setup_middlewares",
     "setup_statics",
     "nexelStaticFiles",
-    "copy_nexel_venv",
     "run_app",
     "UvicornAccessFilter",
 ]
