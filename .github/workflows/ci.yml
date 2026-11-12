@@ -38,3 +38,9 @@ jobs:
           path: "report.xml"
           reporter: python-xunit
         if: always()
+
+      - name: Coverage Report
+        uses: mridang/action-test-reporter@v1
+        with:
+          coverage-file: "coverage/lcov.info"
+        if: always()

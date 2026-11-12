@@ -1,6 +1,6 @@
 [project]
 name = "nexelpy"
-version = "1.15.13"
+version = "1.15.14"
 description = "Modern Python web framework with Pythonic CSS/JS generation. One language, one file."
 readme = "README.md"
 requires-python = ">=3.8"
