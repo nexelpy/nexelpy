@@ -17,6 +17,7 @@ from .mediator.cookiesManager import CookiesManager
 from .mediator.reDirect import redirect_now
 from .mediator.request_proxy.requestProxy import request as REQUEST
 from .mediator.request_proxy.request_object import get_request 
+from .mediator.mainAppHelper.secretKey import CryptoHelper
 
 # --- Criptyle (CSS/JS) ---
 from .criptyle.nextyle.nextyleBuilder import Nextyle

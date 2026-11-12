@@ -56,3 +56,10 @@ class CookiesManager:
                 "samesite": "lax",
                 "partitioned": False,
             })
+
+
+    def _setCookiesFromList(self, response) -> None:
+        for cookie in self._cookies_list:
+            params = {k: v for k, v in cookie.items() if v is not None}
+            response.set_cookie(**params)
+        self._cookies_list.clear()

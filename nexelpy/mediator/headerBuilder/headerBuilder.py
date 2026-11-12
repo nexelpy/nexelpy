@@ -76,66 +76,66 @@ class HeaderBuilder:
 
     def add_raw_header(self, **headers):
         for key, value in headers.items():
-            self._raw_headers[key.replace("__","-")] = value
+            self._raw_headers[key.replace("__", "-")] = value
         return self
     
     def set_super_strict(self):
         self.add_raw_header(
-            Content_Security_Policy="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
-            Strict_Transport_Security="max-age=31536000; includeSubDomains; preload",
-            Cache_Control="no-store, no-cache, must-revalidate, private",
-            X_Frame_Options="DENY",
-            X_Content_Type_Options="nosniff",
-            Referrer_Policy="no-referrer",
-            Permissions_Policy="geolocation=(), camera=(), microphone=(), usb=(), payment=(), encrypted-media=(), speaker=(), autoplay=()",
-            Cross_Origin_Opener_Policy="same-origin",
-            Cross_Origin_Embedder_Policy="require-corp",
-            Cross_Origin_Resource_Policy="same-origin",
-            Origin_Agent_Cluster="?1",)
+            Content__Security__Policy="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+            Strict__Transport__Security="max-age=31536000; includeSubDomains; preload",
+            Cache__Control="no-store, no-cache, must-revalidate, private",
+            X__Frame__Options="DENY",
+            X__Content__Type__Options="nosniff",
+            Referrer__Policy="no-referrer",
+            Permissions__Policy="geolocation=(), camera=(), microphone=(), usb=(), payment=(), encrypted-media=(), speaker=(), autoplay=()",
+            Cross__Origin__Opener__Policy="same-origin",
+            Cross__Origin__Embedder__Policy="require-corp",
+            Cross__Origin__Resource__Policy="same-origin",
+            Origin__Agent__Cluster="?1",)
         return self
 
     def set_strict(self):
         self.add_raw_header(
-            Content_Security_Policy="default-src 'self'; script-src 'self' https:; style-src 'self' https:; img-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'",
-            Strict_Transport_Security="max-age=31536000; includeSubDomains; preload",
-            Cache_Control="no-cache, no-store, must-revalidate",
-            X_Frame_Options="SAMEORIGIN",
-            X_Content_Type_Options="nosniff",
-            Referrer_Policy="strict-origin-when-cross-origin",
-            Permissions_Policy="geolocation=(self), camera=(), microphone=(), usb=(), payment=(), autoplay=(self)",
-            Cross_Origin_Opener_Policy="same-origin",
-            Cross_Origin_Embedder_Policy="require-corp",
-            Cross_Origin_Resource_Policy="same-origin",
-            Origin_Agent_Cluster="?1")
+            Content__Security__Policy="default-src 'self'; script-src 'self' https:; style-src 'self' https:; img-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'",
+            Strict__Transport__Security="max-age=31536000; includeSubDomains; preload",
+            Cache__Control="no-cache, no-store, must-revalidate",
+            X__Frame__Options="SAMEORIGIN",
+            X__Content__Type__Options="nosniff",
+            Referrer__Policy="strict-origin-when-cross-origin",
+            Permissions__Policy="geolocation=(self), camera=(), microphone=(), usb=(), payment=(), autoplay=(self)",
+            Cross__Origin__Opener__Policy="same-origin",
+            Cross__Origin__Embedder__Policy="require-corp",
+            Cross__Origin__Resource__Policy="same-origin",
+            Origin__Agent__Cluster="?1")
         return self
 
     def set_normal(self):
         self.add_raw_header(
-            Content_Security_Policy="default-src 'self' https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'self'; base-uri 'self'",
-            Strict_Transport_Security="max-age=31536000; includeSubDomains",
-            Cache_Control="public, max-age=86400",
-            X_Frame_Options="SAMEORIGIN",
-            X_Content_Type_Options="nosniff",
-            Referrer_Policy="strict-origin-when-cross-origin",
-            Permissions_Policy="geolocation=(self), autoplay=(*)",
-            Cross_Origin_Opener_Policy="same-origin-allow-popups",
-            Cross_Origin_Resource_Policy="cross-origin",
-            Origin_Agent_Cluster="?1")
+            Content__Security__Policy="default-src 'self' https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'self'; base-uri 'self'",
+            Strict__Transport__Security="max-age=31536000; includeSubDomains",
+            Cache__Control="public, max-age=86400",
+            X__Frame__Options="SAMEORIGIN",
+            X__Content__Type__Options="nosniff",
+            Referrer__Policy="strict-origin-when-cross-origin",
+            Permissions__Policy="geolocation=(self), autoplay=(*)",
+            Cross__Origin__Opener__Policy="same-origin-allow-popups",
+            Cross__Origin__Resource__Policy="cross-origin",
+            Origin__Agent__Cluster="?1")
         return self
 
     def set_relaxed(self):
         self.add_raw_header(
-            Content_Security_Policy="default-src *; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data:; connect-src *; frame-ancestors *; base-uri *",
-            Strict_Transport_Security="max-age=86400",
-            Cache_Control="public, max-age=31536000, immutable",
-            X_Frame_Options="SAMEORIGIN",
-            X_Content_Type_Options="nosniff",
-            Referrer_Policy="unsafe-url",
-            Permissions_Policy="*",
-            Cross_Origin_Opener_Policy="unsafe-none",
-            Cross_Origin_Embedder_Policy="unsafe-none",
-            Cross_Origin_Resource_Policy="cross-origin",
-            Origin_Agent_Cluster="?0")
+            Content__Security__Policy="default-src *; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data:; connect-src *; frame-ancestors *; base-uri *",
+            Strict__Transport__Security="max-age=86400",
+            Cache__Control="public, max-age=31536000, immutable",
+            X__Frame__Options="SAMEORIGIN",
+            X__Content__Type__Options="nosniff",
+            Referrer__Policy="unsafe-url",
+            Permissions__Policy="*",
+            Cross__Origin__Opener__Policy="unsafe-none",
+            Cross__Origin__Embedder__Policy="unsafe-none",
+            Cross__Origin__Resource__Policy="cross-origin",
+            Origin__Agent__Cluster="?0")
         return self
 
     def build_header(self):
