@@ -37,3 +37,14 @@ def test_watching_message_includes_root():
     combined = " ".join(str(c) for c in captured)
     assert "/my/project" in combined
     assert "watching" in combined
+
+def test_branding_prints_secret_key_warning(monkeypatch, capsys):
+    monkeypatch.delenv("_NEXELPY_KEY_WARNED", raising=False)
+    from nexelpy.mediator.mainAppHelper.branding import print_branding
+    
+    print_branding("/tmp", has_node=True, has_secret_key=False)
+    captured = capsys.readouterr()
+    
+    assert "NEXELPY_SECRET_KEY is not set" in captured.out
+    import os
+    assert "_NEXELPY_KEY_WARNED" in os.environ

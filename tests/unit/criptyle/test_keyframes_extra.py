@@ -20,7 +20,7 @@ def test_keyframe_media_queries(nextyle, tmp_path):
     assert "@keyframes fade-in--" in css
     assert "0% {" in css
     assert "opacity: 0;" in css
-    assert "@media (min-width: 640px)" in css
+    assert "@media (min-width: 576px)" in css
     assert "opacity: 0.5;" in css
 
 

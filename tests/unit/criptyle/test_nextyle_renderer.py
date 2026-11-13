@@ -19,4 +19,4 @@ def test_nextyle_generation(tmp_path, monkeypatch):
     content = css_file.read_text()
     assert "body {" in content
     assert "color: red;" in content
-    assert "@media (min-width: 640px)" in content
+    assert "@media (min-width: 576px)" in content

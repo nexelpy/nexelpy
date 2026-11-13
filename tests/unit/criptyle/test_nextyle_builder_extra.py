@@ -157,7 +157,7 @@ def test_raw_css_media_kwargs(nextyle, tmp_path):
     with Nextyle(nextyle) as y:
         y.raw_css(sm=".x { color: blue; }")
     css = _css(tmp_path)
-    assert "@media (min-width: 640px)" in css
+    assert "@media (min-width: 576px)" in css
     assert ".x { color: blue; }" in css
 
 

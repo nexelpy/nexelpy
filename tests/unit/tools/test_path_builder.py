@@ -57,3 +57,13 @@ def test_dotdot_escapes_project_root_blocked(tmp_path):
     pb = PathBuilder(tmp_path / "main.py", tmp_path)
     assert pb._resolve_file_path("../outside.txt") == Path("/")
 
+def test_path_builder_caching(tmp_path):
+    from nexelpy.view.pathBuilder import _compute_base_paths
+    file1 = tmp_path / "test1.py"
+    file1.touch()
+    
+    pb1 = PathBuilder(file1, tmp_path)
+    info1 = pb1._base_url
+    
+    pb2 = PathBuilder(file1, tmp_path)
+    assert info1 == pb2._base_url

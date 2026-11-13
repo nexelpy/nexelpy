@@ -13,18 +13,18 @@ def test_nextyle_media_queries(project_root):
     py_file.touch()
     
     with Nextyle(py_file) as y:
-        y.select(".card").padding("4px", sm="8px", md="12px", lg="20px")
+        y.select(".card").padding("4px", sm="8px", md="12px", lg="20px", ul="24px")
         
     css_file = project_root / "style.css"
     content = css_file.read_text()
     
     assert ".card {" in content
     assert "padding: 4px;" in content
-    assert "@media (min-width: 640px)" in content
+    assert "@media (min-width: 576px)" in content
     assert "padding: 8px;" in content
     assert "@media (min-width: 768px)" in content
     assert "padding: 12px;" in content
-    assert "@media (min-width: 1024px)" in content
+    assert "@media (min-width: 992px)" in content
     assert "padding: 20px;" in content
 
 def test_nextyle_keyframes(project_root):

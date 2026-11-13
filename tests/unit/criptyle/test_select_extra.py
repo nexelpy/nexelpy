@@ -71,12 +71,13 @@ def test_scope_selector_with_ampersand(nextyle, tmp_path):
 
 def test_multiple_media_kwargs(nextyle, tmp_path):
     with Nextyle(nextyle) as y:
-        y.select(".x").color("red", sm="blue", md="green", lg="black")
+        y.select(".x").color("red", sm="blue", md="green", lg="black", ul="white")
     css = (tmp_path / "style.css").read_text()
-    assert "color: red;" in css
-    assert "@media (min-width: 640px)" in css
+    assert "@media (min-width: 576px)" in css
     assert "color: blue;" in css
     assert "@media (min-width: 768px)" in css
     assert "color: green;" in css
-    assert "@media (min-width: 1024px)" in css
+    assert "@media (min-width: 992px)" in css
     assert "color: black;" in css
+    assert "@media (min-width: 1400px)" in css
+    assert "color: white;" in css

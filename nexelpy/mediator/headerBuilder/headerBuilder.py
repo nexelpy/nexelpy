@@ -81,37 +81,77 @@ class HeaderBuilder:
     
     def set_super_strict(self):
         self.add_raw_header(
-            Content__Security__Policy="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
-            Strict__Transport__Security="max-age=31536000; includeSubDomains; preload",
-            Cache__Control="no-store, no-cache, must-revalidate, private",
+            Content__Security__Policy=(
+                "default-src 'self'; "
+                "script-src 'self'; "
+                "style-src 'self'; "
+                "img-src 'self'; "
+                "connect-src 'self'; "
+                "frame-ancestors 'none'; "
+                "base-uri 'none'; "
+                "form-action 'self'; "
+                "object-src 'none'; "
+                "require-trusted-types-for 'script'"
+            ),
+            Strict__Transport__Security="max-age=63072000; includeSubDomains; preload",
+            Cache__Control="no-store, max-age=0",
             X__Frame__Options="DENY",
             X__Content__Type__Options="nosniff",
             Referrer__Policy="no-referrer",
-            Permissions__Policy="geolocation=(), camera=(), microphone=(), usb=(), payment=(), encrypted-media=(), speaker=(), autoplay=()",
+            Permissions__Policy=(
+                "geolocation=(), camera=(), microphone=(), usb=(), "
+                "payment=(), autoplay=(), fullscreen=(), "
+                "accelerometer=(), gyroscope=(), magnetometer=()"
+            ),
             Cross__Origin__Opener__Policy="same-origin",
             Cross__Origin__Embedder__Policy="require-corp",
             Cross__Origin__Resource__Policy="same-origin",
-            Origin__Agent__Cluster="?1",)
+            Origin__Agent__Cluster="?1"
+        )
         return self
 
     def set_strict(self):
         self.add_raw_header(
-            Content__Security__Policy="default-src 'self'; script-src 'self' https:; style-src 'self' https:; img-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'",
-            Strict__Transport__Security="max-age=31536000; includeSubDomains; preload",
+            Content__Security__Policy=(
+                "default-src 'self'; "
+                "script-src 'self' 'strict-dynamic' 'nonce-{RANDOM}'; "
+                "style-src 'self' 'unsafe-inline'; "
+                "img-src 'self' data: https:; "
+                "font-src 'self' https:; "
+                "connect-src 'self' https:; "
+                "frame-ancestors 'self'; "
+                "base-uri 'self'; "
+                "form-action 'self'; "
+                "object-src 'none'"
+            ),
+            Strict__Transport__Security="max-age=63072000; includeSubDomains; preload",
             Cache__Control="no-cache, no-store, must-revalidate",
             X__Frame__Options="SAMEORIGIN",
             X__Content__Type__Options="nosniff",
             Referrer__Policy="strict-origin-when-cross-origin",
-            Permissions__Policy="geolocation=(self), camera=(), microphone=(), usb=(), payment=(), autoplay=(self)",
+            Permissions__Policy=(
+                "geolocation=(self), camera=(), microphone=(), usb=(), "
+                "payment=(), autoplay=(self), fullscreen=(self)"
+            ),
             Cross__Origin__Opener__Policy="same-origin",
             Cross__Origin__Embedder__Policy="require-corp",
             Cross__Origin__Resource__Policy="same-origin",
-            Origin__Agent__Cluster="?1")
+            Origin__Agent__Cluster="?1"
+        )
         return self
 
     def set_normal(self):
         self.add_raw_header(
-            Content__Security__Policy="default-src 'self' https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'self'; base-uri 'self'",
+            Content__Security__Policy=(
+                "default-src 'self' https:; "
+                "script-src 'self' 'unsafe-inline' https:; "
+                "style-src 'self' 'unsafe-inline' https:; "
+                "img-src 'self' data: https:; "
+                "connect-src 'self' https:; "
+                "frame-ancestors 'self'; "
+                "base-uri 'self'; "
+                "form-action 'self'"
+            ),
             Strict__Transport__Security="max-age=31536000; includeSubDomains",
             Cache__Control="public, max-age=86400",
             X__Frame__Options="SAMEORIGIN",
@@ -120,12 +160,21 @@ class HeaderBuilder:
             Permissions__Policy="geolocation=(self), autoplay=(*)",
             Cross__Origin__Opener__Policy="same-origin-allow-popups",
             Cross__Origin__Resource__Policy="cross-origin",
-            Origin__Agent__Cluster="?1")
+            Origin__Agent__Cluster="?1"
+        )
         return self
 
     def set_relaxed(self):
         self.add_raw_header(
-            Content__Security__Policy="default-src *; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data:; connect-src *; frame-ancestors *; base-uri *",
+            Content__Security__Policy=(
+                "default-src *; "
+                "script-src * 'unsafe-inline' 'unsafe-eval'; "
+                "style-src * 'unsafe-inline'; "
+                "img-src * data:; "
+                "connect-src *; "
+                "frame-ancestors *; "
+                "base-uri *"
+            ),
             Strict__Transport__Security="max-age=86400",
             Cache__Control="public, max-age=31536000, immutable",
             X__Frame__Options="SAMEORIGIN",
@@ -135,7 +184,8 @@ class HeaderBuilder:
             Cross__Origin__Opener__Policy="unsafe-none",
             Cross__Origin__Embedder__Policy="unsafe-none",
             Cross__Origin__Resource__Policy="cross-origin",
-            Origin__Agent__Cluster="?0")
+            Origin__Agent__Cluster="?0"
+        )
         return self
 
     def build_header(self):

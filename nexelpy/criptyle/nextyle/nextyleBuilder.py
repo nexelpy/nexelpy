@@ -11,11 +11,11 @@ from ..sharedClasses import BasePathControl
 
 class Nextyle(BasePathControl):
     DEFAULT_MEDIA_QUERIES = {
-        "sm": "@media (min-width: 640px)",
+        "sm": "@media (min-width: 576px)",
         "md": "@media (min-width: 768px)",
-        "lg": "@media (min-width: 1024px)",
-        "xl": "@media (min-width: 1280px)",
-        "ul": "@media (min-width: 1536px)",
+        "lg": "@media (min-width: 992px)",
+        "xl": "@media (min-width: 1200px)",
+        "ul": "@media (min-width: 1400px)",
     }
 
     _RAW_URL_PATTERN = re.compile(r'url\(\s*(["\']?)(.*?)\1\s*\)')

@@ -1,5 +1,6 @@
 from starlette.applications import Starlette
 from .reDirect import redirect_exception_handler, RedirectException
+from .mainAppHelper.static_verifier import StaticProductionVerifier
 import os
 import sys
 import inspect
@@ -31,21 +32,24 @@ class MainAppBuilder(Starlette):
         self.Middleware_modules: list[str] = []
         self.manual_routes: list[dict] = []
         self.ignore_watch_dirs = ignore_watch_dirs or []
-        self.secretKey = resolve_secret_key(secretKey)
+        
+        # ---------- 2. Detect parent vs child  ----------
+        is_direct_run = sys.argv[0].endswith(".py")
+        self._is_parent = is_direct_run and not Reloader.is_child()
 
-        # ---------- 2. Node.js info ----------
+        # ---------- 3. Secret Key & Branding ----------
+        self.secretKey = resolve_secret_key(secretKey)
+        has_env_key = bool(secretKey or os.getenv("NEXELPY_SECRET_KEY"))
+        
+        # ---------- 4. Node.js info ----------
         info = RuntimeInfo()
         self.has_node = info.has_node
         self.node_version_ok = info.node_version_ok
         self.node_version = info.node_version
 
-        # ---------- 3. Detect parent vs child ----------
-        is_direct_run = sys.argv[0].endswith(".py")
-        self._is_parent = is_direct_run and not Reloader.is_child()
-
-        # ---------- 4. Setup ----------
+        # ---------- 5. Setup ----------
         if self._is_parent:
-            print_branding(self.root_Path, self.has_node)
+            print_branding(self.root_Path, self.has_node, has_secret_key=has_env_key)
         else:
             result = setup_routes(self, self.file)
             self.AutoRegister_list = result["routes"]
@@ -53,7 +57,9 @@ class MainAppBuilder(Starlette):
             register_root_list(self, self.AutoRegister_list)
             setup_middlewares(self)
 
+        # ---------- 6. Production Static Files Warning ----------
         setup_statics(self, self.file, mountStatics)
+        StaticProductionVerifier.verify_startup(mount_statics=mountStatics, is_direct_run=is_direct_run, is_parent=self._is_parent)
         self._signal_ready()
 
     # ---------------------------------------------------------

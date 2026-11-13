@@ -1,10 +1,11 @@
 from pathlib import Path
 from starlette.staticfiles import StaticFiles
 from starlette.responses import PlainTextResponse
-
+from .static_verifier import StaticProductionVerifier
 
 class nexelStaticFiles(StaticFiles):
     async def __call__(self, scope, receive, send):
+        StaticProductionVerifier.verify_request(scope)
         if "/static/" not in scope["path"] and not scope["path"].endswith((".js", ".css", ".html")):
             await PlainTextResponse("Not Found", status_code=404)(scope, receive, send)
             return

@@ -1,4 +1,3 @@
-# tests/unit/mediator/test_header_builder_presets.py
 import pytest
 from nexelpy.mediator.headerBuilder.headerBuilder import HeaderBuilder
 
@@ -14,20 +13,28 @@ def _hdrs(preset_name):
         "X-Frame-Options": "SAMEORIGIN",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Cross-Origin-Embedder-Policy": "require-corp",
+        "Cross-Origin-Resource-Policy": "same-origin",
     }),
     ("set_super_strict", {
         "X-Frame-Options": "DENY",
         "Referrer-Policy": "no-referrer",
-        "Cache-Control": "no-store, no-cache, must-revalidate, private",
+        "Cache-Control": "no-store, max-age=0",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Cross-Origin-Embedder-Policy": "require-corp",
+        "Cross-Origin-Resource-Policy": "same-origin",
     }),
     ("set_normal", {
         "X-Frame-Options": "SAMEORIGIN",
         "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+        "Cross-Origin-Resource-Policy": "cross-origin",
     }),
     ("set_relaxed", {
         "Referrer-Policy": "unsafe-url",
         "Cross-Origin-Embedder-Policy": "unsafe-none",
         "Origin-Agent-Cluster": "?0",
+        "Cross-Origin-Resource-Policy": "cross-origin",
     }),
 ])
 def test_preset_has_expected_keys(preset, checks):

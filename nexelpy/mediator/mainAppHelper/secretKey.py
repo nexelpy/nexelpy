@@ -1,4 +1,4 @@
-import os
+import os,sys
 import json
 from cryptography.fernet import Fernet
 from rich.console import Console
@@ -7,12 +7,6 @@ console = Console()
 
 
 def resolve_secret_key(provided_key: bytes | None = None) -> bytes:
-    """
-    Resolve the secret key from:
-    1. Provided key (explicit)
-    2. NEXELPY_SECRET_KEY env var
-    3. Generate a random key (dev fallback)
-    """
     if provided_key is not None:
         return provided_key
 
@@ -20,9 +14,6 @@ def resolve_secret_key(provided_key: bytes | None = None) -> bytes:
     if env_key:
         return env_key.encode()
 
-    console.print(
-        "[dim yellow]⚠ No NEXELPY_SECRET_KEY set. Using a random key (sessions reset on restart).[/dim yellow]"
-    )
     return Fernet.generate_key()
 
 

@@ -59,17 +59,12 @@ class RegistrationBuilder:
             runner_route.run()
 
         self._registered_routes = self._registry.get_all()
-        self._log_routes()
 
         return {
             "routes": self._registered_routes,
             "middleware_modules": self._middleware_modules,
         }
 
-    def _log_routes(self) -> None:
-        count = len(self._registered_routes)
-        if count == 0:
-            console.print("[yellow]  No routes registered![/yellow]")
 
     def get_routes(self) -> List[Dict]:
         return self._registered_routes

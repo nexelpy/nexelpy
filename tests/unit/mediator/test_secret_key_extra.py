@@ -16,13 +16,11 @@ def test_resolve_env_key(monkeypatch):
     assert resolve_secret_key(None) == b"env-key-value"
 
 
-def test_resolve_generates_random_key(monkeypatch, capsys):
+def test_resolve_generates_random_key(monkeypatch):
     monkeypatch.delenv("NEXELPY_SECRET_KEY", raising=False)
     key = resolve_secret_key(None)
     assert isinstance(key, bytes)
     assert len(key) == 44
-    out = capsys.readouterr().out
-    assert "NEXELPY_SECRET_KEY" in out
 
 
 def test_crypto_with_explicit_key():
