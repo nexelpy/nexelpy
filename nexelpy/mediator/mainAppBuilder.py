@@ -17,7 +17,8 @@ from .mainAppHelper import (
     run_app,
     resolve_secret_key
 )
-
+from rich.console import Console
+console = Console()
 
 class MainAppBuilder(Starlette):
     def __init__(self, file=__file__, mountStatics=True, secretKey=None, ignore_watch_dirs=None):
@@ -86,9 +87,11 @@ class MainAppBuilder(Starlette):
     def route(self, route="", methods=["GET"], prefix=""):
         def decorator(func):
             if not inspect.iscoroutinefunction(func):
-                raise TypeError(
-                    f"Route handler '{func.__name__}' must be async (use 'async def')."
-                )
+                console.print("\n[bold red](NexelPy Route Error)[/bold red]")
+                console.print(f"         [blue]handler:[/blue] {func.__name__}")
+                console.print(f"         [blue]error:[/blue] Handler must be async (use 'async def').")
+                console.print()
+                sys.exit(1)
             self.add_manual_route(route=route, prefix=prefix, methods=methods, func=func)
             return func
         return decorator

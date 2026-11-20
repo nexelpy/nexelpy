@@ -26,15 +26,18 @@ class CSSRenderer:
 
     def render_context_actions(self, context, group_name: str = "base") -> List[str]:
         blocks = []
-        for action in context.actions:
+        
+        for action in context.actions:            
             if isinstance(action, str) and group_name == "base":
                 blocks.append(action)
                 continue
+                
             if hasattr(action, "render_group"):
                 rendered = action.render_group(group_name)
                 if rendered:
                     blocks.append(rendered)
                 continue
+                
             if isinstance(action, tuple) and action[0] == "raw" and action[1] == group_name:
                 blocks.append(action[2])
                 continue

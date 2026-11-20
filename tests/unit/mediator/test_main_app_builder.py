@@ -110,13 +110,17 @@ def test_route_decorator_with_prefix(tmp_path, monkeypatch):
     assert app.manual_routes[0]["path"] == "/api/users"
 
 
-def test_route_decorator_sync_raises(tmp_path, monkeypatch):
+def test_route_decorator_sync_raises(tmp_path, monkeypatch, capsys):
     app = _build(tmp_path, monkeypatch)
 
-    with pytest.raises(TypeError, match="must be async"):
+    with pytest.raises(SystemExit) as exc_info:
         @app.route("/bad")
         def handler():
             return "no"
+    
+    assert exc_info.value.code == 1
+    captured = capsys.readouterr()
+    assert "Handler must be async" in captured.out
 
 
 def test_route_decorator_returns_function(tmp_path, monkeypatch):

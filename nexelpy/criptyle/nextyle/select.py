@@ -17,6 +17,7 @@ class Select:
         self.pseudo_suffix = pseudo_suffix
         self.scope_selector = scope_selector
         self.rules = rules if rules is not None else {}
+        self.nested_selectors = []  
 
     def _add_prop(self, css_prop: str, base_val: Optional[Any] = None, **kwargs) -> "Select":
         if base_val is not None:
@@ -25,6 +26,28 @@ class Select:
             if value is not None:
                 self.rules.setdefault((media_key, self.pseudo_suffix), {})[css_prop] = str(value)
         return self
+
+    def nest(self, selector: str) -> "Select":
+        parent_sel = self.selector_name.strip()
+        child_sel = selector.strip()
+        
+        if child_sel.startswith("&"):
+            new_selector = f"{parent_sel}{child_sel[1:]}"
+        else:
+            new_selector = f"{parent_sel} {child_sel}"
+            
+        nested = Select(
+            selector_name=new_selector,
+            parent_nextyle=self.parent,
+            pseudo_suffix=self.pseudo_suffix,
+            rules={}, 
+            scope_selector=self.scope_selector
+        )
+        
+        
+        if hasattr(self.parent, "current_context"):
+            self.parent.current_context.actions.append(nested)
+        return nested
 
     @staticmethod
     def _make_css_method(css_property_name: str):
@@ -51,10 +74,16 @@ class Select:
     def pseudo(self, pseudo_name: str) -> "Select":
         pseudo_name = pseudo_name.strip()
         pseudo_name = pseudo_name if pseudo_name.startswith(":") else f":{pseudo_name.replace('_', '-')}"
-        return Select(selector_name=self.selector_name, parent_nextyle=self.parent, pseudo_suffix=f"{self.pseudo_suffix}{pseudo_name}", rules=self.rules, scope_selector=self.scope_selector)
+        return Select(
+            selector_name=self.selector_name, 
+            parent_nextyle=self.parent, 
+            pseudo_suffix=f"{self.pseudo_suffix}{pseudo_name}", 
+            rules=self.rules, 
+            scope_selector=self.scope_selector
+        )
 
-    def _render_selector(self, pseudo_suffix: str) -> str:
-        selector = self.selector_name.strip()
+    def _render_selector(self, pseudo_suffix: str, override_selector: str = None) -> str:
+        selector = override_selector or self.selector_name.strip()
         if not self.scope_selector:
             return f"{selector}{pseudo_suffix}"
         if selector in ("&", ":self", ""):
@@ -65,6 +94,7 @@ class Select:
 
     def render_group(self, group_name: str) -> Optional[str]:
         blocks = []
+        
         for (rule_group, pseudo_suffix), properties in self.rules.items():
             if rule_group != group_name or not properties:
                 continue
@@ -73,14 +103,17 @@ class Select:
                 lines.append(f"    {prop}: {value};")
             lines.append("}")
             blocks.append("\n".join(lines))
+            
+        for nested in self.nested_selectors:
+            rendered_nested = nested.render_group(group_name)
+            if rendered_nested:
+                blocks.append(rendered_nested)
+                
         return "\n\n".join(blocks) if blocks else None
 
-#--------------------------------------------------------------------------------------------------------
 
 for css_property in CSS_PROPERTIES:
     setattr(Select, css_property.replace("-", "_"), Select._make_css_method(css_property))
-
-#--------------------------------------------------------------------------------------------------------
 
 PSEUDO_ELEMENTS_AND_CLASSES = ["hover","focus","focus_visible","focus_within","active","disabled","enabled","checked",
     "visited","first_child","last_child","first_of_type","last_of_type","::before","::after","::placeholder","::selection","::marker",]

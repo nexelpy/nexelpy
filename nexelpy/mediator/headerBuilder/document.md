@@ -2,14 +2,14 @@
 
 ## Overview
 
-`HeaderBuilder` is a powerful class for building HTTP security headers. It is automatically instantiated in the `Page` class and accessed via `x.headers`.
+`HeaderBuilder` is a powerful class for building HTTP security headers. It is automatically instantiated in the `Page` class and accessed via `x.Headers`.
 
 ```python
 # Usage in project
 x = Page()
-x.headers.csp.add('default-src', "'self'")
-x.headers.hsts(max_age=31536000, include_subdomains=True, preload=True)
-x.headers.set_strict()
+x.Headers.csp.add('default-src', "'self'")
+x.Headers.hsts(max_age=31536000, include_subdomains=True, preload=True)
+x.Headers.set_strict()
 # Headers are automatically built by Page class
 ```
 
@@ -21,7 +21,7 @@ x.headers.set_strict()
 
 **Access:**
 ```python
-x.headers.csp
+x.Headers.csp
 ```
 
 **Method:**
@@ -63,22 +63,22 @@ child-src, prefetch-src, navigate-to
 **Examples:**
 ```python
 # Allow only own domain
-x.headers.csp.add('default-src', "'self'")
+x.Headers.csp.add('default-src', "'self'")
 
 # Scripts from own domain and CDN
-x.headers.csp.add('script-src', "'self'", "https://cdnjs.cloudflare.com")
+x.Headers.csp.add('script-src', "'self'", "https://cdnjs.cloudflare.com")
 
 # Styles from own domain and Google Fonts
-x.headers.csp.add('style-src', "'self'", "https://fonts.googleapis.com")
+x.Headers.csp.add('style-src', "'self'", "https://fonts.googleapis.com")
 
 # Images from own domain and any HTTPS domain
-x.headers.csp.add('img-src', "'self'", "https:")
+x.Headers.csp.add('img-src', "'self'", "https:")
 
 # Frames only from YouTube
-x.headers.csp.add('frame-ancestors', "https://www.youtube.com")
+x.Headers.csp.add('frame-ancestors', "https://www.youtube.com")
 
 # API connections
-x.headers.csp.add('connect-src', "'self'", "https://api.example.com")
+x.Headers.csp.add('connect-src', "'self'", "https://api.example.com")
 ```
 
 ---
@@ -101,19 +101,19 @@ def hsts(self, max_age=31536000, include_subdomains=True, preload=False)
 **Examples:**
 ```python
 # Default (1 year, include subdomains)
-x.headers.hsts()
+x.Headers.hsts()
 
 # 2 years
-x.headers.hsts(max_age=63072000)
+x.Headers.hsts(max_age=63072000)
 
 # Without subdomains
-x.headers.hsts(include_subdomains=False)
+x.Headers.hsts(include_subdomains=False)
 
 # For preload list
-x.headers.hsts(max_age=31536000, include_subdomains=True, preload=True)
+x.Headers.hsts(max_age=31536000, include_subdomains=True, preload=True)
 
 # Disable HSTS
-x.headers.hsts(max_age=0)
+x.Headers.hsts(max_age=0)
 ```
 
 ---
@@ -140,19 +140,19 @@ def cache(self, cache_control="no-cache", max_age=31536000, s_maxage="",
 **Examples:**
 ```python
 # No caching
-x.headers.cache()
+x.Headers.cache()
 
 # Public cache for 1 year
-x.headers.cache(cache_control="public", max_age=31536000)
+x.Headers.cache(cache_control="public", max_age=31536000)
 
 # Cache with revalidation
-x.headers.cache(cache_control="public", max_age=3600, stale_while_revalidate=300)
+x.Headers.cache(cache_control="public", max_age=3600, stale_while_revalidate=300)
 
 # For CDN
-x.headers.cache(cache_control="public", max_age=3600, s_maxage=86400)
+x.Headers.cache(cache_control="public", max_age=3600, s_maxage=86400)
 
 # Static assets
-x.headers.cache(cache_control="public, immutable", max_age=31536000)
+x.Headers.cache(cache_control="public, immutable", max_age=31536000)
 ```
 
 ---
@@ -173,10 +173,10 @@ def frame_options(self, policy="DENY")
 **Examples:**
 ```python
 # Prevent all iframes
-x.headers.frame_options()
+x.Headers.frame_options()
 
 # Allow only same domain
-x.headers.frame_options(policy="SAMEORIGIN")
+x.Headers.frame_options(policy="SAMEORIGIN")
 ```
 
 ---
@@ -191,7 +191,7 @@ def content_type_options(self)
 **Examples:**
 ```python
 # Always enable
-x.headers.content_type_options()
+x.Headers.content_type_options()
 ```
 
 ---
@@ -224,13 +224,13 @@ unsafe-url
 **Examples:**
 ```python
 # Default
-x.headers.referrer_Policy()
+x.Headers.referrer_Policy()
 
 # Maximum privacy
-x.headers.referrer_Policy(policy="no-referrer")
+x.Headers.referrer_Policy(policy="no-referrer")
 
 # Same domain only
-x.headers.referrer_Policy(policy="same-origin")
+x.Headers.referrer_Policy(policy="same-origin")
 ```
 
 ---
@@ -239,7 +239,7 @@ x.headers.referrer_Policy(policy="same-origin")
 
 **Access:**
 ```python
-x.headers.permissions_Policy
+x.Headers.permissions_Policy
 ```
 
 **Method:**
@@ -279,18 +279,18 @@ screen-wake-lock, serial, sync-xhr, xr-spatial-tracking
 **Examples:**
 ```python
 # Block all
-x.headers.permissions_Policy.add('geolocation')
-x.headers.permissions_Policy.add('camera')
-x.headers.permissions_Policy.add('microphone')
+x.Headers.permissions_Policy.add('geolocation')
+x.Headers.permissions_Policy.add('camera')
+x.Headers.permissions_Policy.add('microphone')
 
 # Same domain only
-x.headers.permissions_Policy.add('geolocation', 'self')
+x.Headers.permissions_Policy.add('geolocation', 'self')
 
 # All allowed
-x.headers.permissions_Policy.add('autoplay', '*')
+x.Headers.permissions_Policy.add('autoplay', '*')
 
 # Specific domain
-x.headers.permissions_Policy.add('camera', 'https://meet.google.com')
+x.Headers.permissions_Policy.add('camera', 'https://meet.google.com')
 ```
 
 ---
@@ -318,10 +318,10 @@ same-origin                 # Same origin only (most secure)
 **Examples:**
 ```python
 # Most secure
-x.headers.cross_origin_opener()
+x.Headers.cross_origin_opener()
 
 # Allow popups
-x.headers.cross_origin_opener(policy="same-origin-allow-popups")
+x.Headers.cross_origin_opener(policy="same-origin-allow-popups")
 ```
 
 ---
@@ -349,10 +349,10 @@ credentialless     # Cross-origin resources without cookies
 **Examples:**
 ```python
 # Most secure
-x.headers.cross_origin_embedder()
+x.Headers.cross_origin_embedder()
 
 # No restrictions
-x.headers.cross_origin_embedder(policy="unsafe-none")
+x.Headers.cross_origin_embedder(policy="unsafe-none")
 ```
 
 ---
@@ -380,13 +380,13 @@ cross-origin    # All domains
 **Examples:**
 ```python
 # Same origin only
-x.headers.cross_origin_resource()
+x.Headers.cross_origin_resource()
 
 # Same site (includes subdomains)
-x.headers.cross_origin_resource(policy="same-site")
+x.Headers.cross_origin_resource(policy="same-site")
 
 # Public
-x.headers.cross_origin_resource(policy="cross-origin")
+x.Headers.cross_origin_resource(policy="cross-origin")
 ```
 
 ---
@@ -401,7 +401,7 @@ def origin_agent_cluster(self)
 **Examples:**
 ```python
 # Always enable
-x.headers.origin_agent_cluster()
+x.Headers.origin_agent_cluster()
 ```
 
 ---
@@ -431,16 +431,16 @@ executionContexts    # Close execution contexts
 **Examples:**
 ```python
 # Clear everything
-x.headers.clear_site_data('*')
+x.Headers.clear_site_data('*')
 
 # Clear cookies only
-x.headers.clear_site_data('cookies')
+x.Headers.clear_site_data('cookies')
 
 # Clear cookies and cache
-x.headers.clear_site_data('cookies', 'cache')
+x.Headers.clear_site_data('cookies', 'cache')
 
 # Clear cookies and storage
-x.headers.clear_site_data('cookies', 'storage')
+x.Headers.clear_site_data('cookies', 'storage')
 ```
 
 ---
@@ -457,7 +457,7 @@ def add_raw_header(self, **headers)
 **Examples:**
 ```python
 # Custom headers
-x.headers.add_raw_header(
+x.Headers.add_raw_header(
     X_Custom_Header="custom-value",
     X_Another_Header="another-value",
     X_API_Version="v1.0"
@@ -493,12 +493,12 @@ def set_relaxed(self)
 **Examples:**
 ```python
 # Use security level
-x.headers.set_strict()
+x.Headers.set_strict()
 
 # Combine with custom settings
-x.headers.set_strict()
-x.headers.csp.add('script-src', 'https://custom-cdn.com')
-x.headers.add_raw_header(X_Custom="value")
+x.Headers.set_strict()
+x.Headers.csp.add('script-src', 'https://custom-cdn.com')
+x.Headers.add_raw_header(X_Custom="value")
 ```
 
 ---
@@ -508,35 +508,35 @@ x.headers.add_raw_header(X_Custom="value")
 ### Example 1: Standard User Website
 ```python
 x = Page()
-x.headers.set_strict()
-x.headers.csp.add('script-src', "'self'", "https://cdnjs.cloudflare.com")
-x.headers.csp.add('style-src', "'self'", "https://fonts.googleapis.com")
-x.headers.csp.add('img-src', "'self'", "data:", "https:")
+x.Headers.set_strict()
+x.Headers.csp.add('script-src', "'self'", "https://cdnjs.cloudflare.com")
+x.Headers.csp.add('style-src', "'self'", "https://fonts.googleapis.com")
+x.Headers.csp.add('img-src', "'self'", "data:", "https:")
 ```
 
 ### Example 2: Website with YouTube Embed
 ```python
 x = Page()
-x.headers.set_strict()
-x.headers.csp.add('frame-ancestors', "'self'", "https://www.youtube.com")
-x.headers.csp.add('script-src', "'self'", "https://www.youtube.com")
-x.headers.frame_options(policy="SAMEORIGIN")
+x.Headers.set_strict()
+x.Headers.csp.add('frame-ancestors', "'self'", "https://www.youtube.com")
+x.Headers.csp.add('script-src', "'self'", "https://www.youtube.com")
+x.Headers.frame_options(policy="SAMEORIGIN")
 ```
 
 ### Example 3: API with Specific Settings
 ```python
 x = Page()
-x.headers.csp.add('default-src', "'none'")
-x.headers.csp.add('connect-src', "'self'")
-x.headers.cache(cache_control="no-store", max_age=0)
-x.headers.cross_origin_resource(policy="same-origin")
+x.Headers.csp.add('default-src', "'none'")
+x.Headers.csp.add('connect-src', "'self'")
+x.Headers.cache(cache_control="no-store", max_age=0)
+x.Headers.cross_origin_resource(policy="same-origin")
 ```
 
 ### Example 4: Combining with Raw Headers
 ```python
 x = Page()
-x.headers.set_strict()
-x.headers.add_raw_header(
+x.Headers.set_strict()
+x.Headers.add_raw_header(
     X_Request_ID="12345",
     X_API_Version="v2.0",
     X_Rate_Limit="100"
@@ -546,8 +546,8 @@ x.headers.add_raw_header(
 ### Example 5: User Logout
 ```python
 x = Page()
-x.headers.clear_site_data('*')
-x.headers.cache(cache_control="no-store", max_age=0)
+x.Headers.clear_site_data('*')
+x.Headers.cache(cache_control="no-store", max_age=0)
 ```
 
 ---
@@ -573,26 +573,26 @@ x.headers.cache(cache_control="no-store", max_age=0)
 ### Error: `'NoneType' object has no attribute 'add'`
 ```python
 # ❌ Wrong
-x.headers.csp.add()  # CSP not properly initialized
+x.Headers.csp.add()  # CSP not properly initialized
 
 # ✅ Correct
 x = Page()
-x.headers.csp.add('default-src', "'self'")
+x.Headers.csp.add('default-src', "'self'")
 ```
 
 ### Error: `Invalid policy`
 ```python
 # ❌ Wrong
-x.headers.frame_options(policy="ALLOW-FROM")  # ALLOW-FROM is deprecated
+x.Headers.frame_options(policy="ALLOW-FROM")  # ALLOW-FROM is deprecated
 
 # ✅ Correct
-x.headers.frame_options(policy="SAMEORIGIN")
+x.Headers.frame_options(policy="SAMEORIGIN")
 ```
 
 ### Headers Not Applied
 ```python
 # ✅ Correct - Page class handles building automatically
 x = Page()
-x.headers.csp.add('default-src', "'self'")
+x.Headers.csp.add('default-src', "'self'")
 # Headers are automatically built by Page
 ```

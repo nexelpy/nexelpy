@@ -95,14 +95,18 @@ def test_add_manual_route_func_not_callable_raises():
         add_manual_route(app, route="/x", func=None)
 
 
-def test_add_manual_route_invalid_path_raises():
+def test_add_manual_route_invalid_path_raises(capsys):
     app = _make_app()
 
     async def handler():
         return "x"
 
-    with pytest.raises(ValueError, match="must start with"):
+    with pytest.raises(SystemExit) as exc_info:
         add_manual_route(app, route="bad-path", func=handler)
+    
+    assert exc_info.value.code == 1
+    captured = capsys.readouterr()
+    assert "route must start with '/'" in captured.out
 
 
 def test_add_manual_route_with_prefix():

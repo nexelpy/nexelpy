@@ -12,7 +12,7 @@ class ElementBuilder():
         stack = self._parent_stack
         return stack[-1] if stack else self.bodyTag
     
-    def raw(self, html, parent=None):
+    def raw_html(self, html, parent=None):
         node = RawHTML(html, parent=self._setParent(parent))
         node.builder = self
         return node

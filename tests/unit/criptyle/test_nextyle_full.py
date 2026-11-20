@@ -26,6 +26,8 @@ def test_nextyle_media_queries(project_root):
     assert "padding: 12px;" in content
     assert "@media (min-width: 992px)" in content
     assert "padding: 20px;" in content
+    assert "@media (min-width: 1400px)" in content  
+    assert "padding: 24px;" in content
 
 def test_nextyle_keyframes(project_root):
     py_file = project_root / "style.py"

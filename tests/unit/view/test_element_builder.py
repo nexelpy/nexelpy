@@ -64,6 +64,6 @@ def test_all_self_closing_tags_exist():
 
 def test_raw_returns_rawhtml():
     d = Dummy()
-    r = d.raw("<custom/>")
+    r = d.raw_html("<custom/>")
     assert r.html == "<custom/>"
     assert "<custom/>" in d.elementsContainer.build_tag

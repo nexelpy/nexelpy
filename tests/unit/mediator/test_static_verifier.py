@@ -2,13 +2,17 @@ import pytest
 from nexelpy.mediator.mainAppHelper.static_verifier import StaticProductionVerifier
 
 
+
 @pytest.fixture(autouse=True)
-def reset_verifier_state():
+def reset_verifier_state(monkeypatch):
+    monkeypatch.delenv("MAINAPP_ENV", raising=False)
+    monkeypatch.delenv("ENV", raising=False)
+    monkeypatch.delenv("K_SERVICE", raising=False)
+    
     StaticProductionVerifier._warned_startup = False
     StaticProductionVerifier._warned_request = False
     yield
-    StaticProductionVerifier._warned_startup = False
-    StaticProductionVerifier._warned_request = False
+    monkeypatch.delenv("MAINAPP_ENV", raising=False)
 
 
 def test_is_production_with_env_var(monkeypatch):

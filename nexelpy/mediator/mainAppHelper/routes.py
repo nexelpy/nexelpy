@@ -3,12 +3,14 @@ from ..registerations.regestrationBuilder import RegistrationBuilder
 from ..registerations.url_checker import UrlChecker
 from ..wraper_handler import wraper_handler
 import inspect
+import sys
+from rich.console import Console
 
+console = Console()
 
 def setup_routes(app, file: str) -> dict:
     """Scan the project and return {'routes': [...], 'middleware_modules': [...]}."""
     return RegistrationBuilder(file).run()
-
 
 def register_root_list(app, routes: list) -> None:
     """Register the scanned routes on the Starlette app."""
@@ -18,7 +20,6 @@ def register_root_list(app, routes: list) -> None:
             wraper_handler(reg["handler"]),
             methods=reg["methods"],
         )
-
 
 def add_manual_route(
     app,
@@ -32,8 +33,16 @@ def add_manual_route(
         raise TypeError("func must be a callable function")
 
     is_valid, full_path = UrlChecker.check(route, prefix)
+    
+
     if not is_valid:
-        raise ValueError(full_path)
+        console.print("\n[bold red](NexelPy Route Error)[/bold red]")
+        console.print(f"         [blue]handler:[/blue] {func.__name__}")
+        console.print(f"         [blue]route:[/blue] {route}")
+        console.print(f"         [blue]prefix:[/blue] {prefix}")
+        console.print(f"         [blue]error:[/blue] {full_path}")
+        console.print()
+        sys.exit(1)
 
     if methods is None:
         methods = ["GET"]
